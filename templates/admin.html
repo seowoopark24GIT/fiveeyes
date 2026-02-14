@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>약품 관리자</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        input {
+            margin: 4px 0;
+            width: 300px;
+        }
+
+        button {
+            margin-top: 5px;
+        }
+
+        .medicine-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .warning {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>약품 관리자 페이지</h1>
+
+<p class="warning">
+⚠️ 이 페이지는 관리자(개발자/약국 시스템 관리자)용입니다.  
+수정·삭제 시 즉시 DB에 반영됩니다.
+</p >
+
+<h2>약 추가</h2>
+
+<div class="medicine-box">
+    <label>약 이름</label><br>
+    <input id="new-name"><br>
+
+    <label>한 줄 설명</label><br>
+    <input id="new-desc"><br>
+
+    <label>복용방법</label><br>
+    <input id="new-dosage"><br>
+
+    <label>주의사항</label><br>
+    <input id="new-caution"><br>
+
+    <button onclick="createMedicine()">추가</button>
+</div>
+
+<hr>
+
+<h2>약 검색</h2>
+<input type="text" id="searchInput" placeholder="약 이름 입력">
+<button onclick="searchMedicine()">검색</button>
+
+<hr>
+
+<h2>약 목록</h2>
+<div id="medicineList"></div>
+
+<script>
+async function searchMedicine() {
+    const keyword = document.getElementById("searchInput").value;
+    if (!keyword.trim()) return;
+
+    const res = await fetch(`/medicines/search?name=${keyword}`);
+    const data = await res.json();
+
+    const list = document.getElementById("medicineList");
+    list.innerHTML = "";
+
+    if (data.length === 0) {
+        list.innerHTML = "<p>검색 결과가 없습니다.</p >";
+        return;
+    }
+
+    data.forEach(med => {
+        const div = document.createElement("div");
+        div.className = "medicine-box";
+
+        div.innerHTML = `
+            <b>ID:</b> ${med.id}<br>
+
+            <label>약 이름</label><br>
+            <input id="name-${med.id}" value="${med.name}"><br>
+
+            <label>한 줄 설명</label><br>
+            <input id="desc-${med.id}" value="${med.description || ""}"><br>
+
+            <label>복용방법</label><br>
+            <input id="dosage-${med.id}" value="${med.dosage}"><br>
+
+            <label>주의사항</label><br>
+            <input id="caution-${med.id}" value="${med.caution}"><br>
+
+            <button onclick="updateMedicine(${med.id})">수정</button>
+            <button onclick="deleteMedicine(${med.id})">삭제</button>
+        `;
+
+        list.appendChild(div);
+    });
+}
+
+async function updateMedicine(id) {
+    const name = document.getElementById(`name-${id}`).value;
+    const description = document.getElementById(`desc-${id}`).value;
+    const dosage = document.getElementById(`dosage-${id}`).value;
+    const caution = document.getElementById(`caution-${id}`).value;
+
+    const ok = confirm("이 약 정보를 수정하시겠습니까?");
+    if (!ok) return;
+
+    await fetch(`/medicines/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: name,
+            description: description,
+            dosage: dosage,
+            caution: caution
+        })
+    });
+
+    alert("수정 완료");
+}
+
+async function deleteMedicine(id) {
+    const ok = confirm("⚠️ 정말 삭제하시겠습니까? (복구 불가)");
+    if (!ok) return;
+
+    await fetch(`/medicines/${id}`, {
+        method: "DELETE"
+    });
+
+    alert("삭제 완료");
+    searchMedicine();
+}
+
+async function createMedicine() {
+    const name = document.getElementById("new-name").value;
+    const description = document.getElementById("new-desc").value;
+    const dosage = document.getElementById("new-dosage").value;
+    const caution = document.getElementById("new-caution").value;
+
+    if (!name || !dosage || !caution) {
+        alert("이름, 복용방법, 주의사항은 필수입니다.");
+        return;
+    }
+
+    await fetch("/medicines", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: name,
+            description: description,
+            dosage: dosage,
+            caution: caution
+        })
+    });
+
+    alert("추가 완료!");
+
+    // 입력칸 초기화
+    document.getElementById("new-name").value = "";
+    document.getElementById("new-desc").value = "";
+    document.getElementById("new-dosage").value = "";
+    document.getElementById("new-caution").value = "";
+
+    // 바로 검색 다시 실행
+    searchMedicine();
+}
+</script>
+
+</body>
+</html>
