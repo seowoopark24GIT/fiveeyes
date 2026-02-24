@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pharmacy Output System</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Pretendard', 'Segoe UI', sans-serif;
+    background: #f4f7fb;
+    color: #333;
+}
+
+header {
+    background: linear-gradient(90deg, #1cc88a, #17a673);
+    color: white;
+    padding: 20px 40px;
+    font-size: 20px;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #17a673;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #1cc88a;
+    box-shadow: 0 0 5px rgba(28,200,138,0.4);
+}
+
+button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.search-btn {
+    background: #4e73df;
+    color: white;
+}
+
+.search-btn:hover {
+    background: #2e59d9;
+}
+
+.generate-btn {
+    background: #1cc88a;
+    color: white;
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+}
+
+.generate-btn:hover {
+    background: #17a673;
+}
+
+.result-box {
+    background: #f8f9fc;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.braille {
+    font-size: 28px;
+    letter-spacing: 6px;
+    margin-top: 10px;
+    color: #333;
+}
+
+.section-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.search-row {
+    display: flex;
+    gap: 10px;
+}
+
+.search-row input {
+    flex: 1;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 12px;
+    color: #aaa;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    💊 Pharmacy Drug Label Output System
+</header>
+
+<div class="container">
+
+    <!-- 1. 검색 -->
+    <div class="card">
+        <h2>1️⃣ 약 검색</h2>
+        <div class="search-row">
+            <input type="text" id="searchInput" placeholder="약 이름 입력">
+            <button class="search-btn" onclick="searchMedicine()">검색</button>
+        </div>
+    </div>
+
+    <!-- 2. 정보 수정 -->
+    <div class="card">
+        <h2>2️⃣ 약 정보 수정</h2>
+
+        <label class="section-label">약 이름</label>
+        <input id="name">
+
+        <label class="section-label">한 줄 설명</label>
+        <input id="description">
+
+        <label class="section-label">복용방법</label>
+        <textarea id="dosage" rows="3"></textarea>
+
+        <label class="section-label">주의사항</label>
+        <textarea id="caution" rows="3"></textarea>
+
+        <button class="generate-btn" onclick="generateOutput()">
+            출력 생성
+        </button>
+    </div>
+
+    <!-- 3. 결과 -->
+    <div class="card">
+        <h2>3️⃣ 출력 결과</h2>
+
+        <div class="result-box">
+            <strong>NFC 저장 정보</strong>
+            <pre id="nfcResult"></pre>
+        </div>
+
+        <div class="result-box" style="margin-top:15px;">
+            <strong>점자 약 이름</strong>
+            <div id="brailleResult" class="braille"></div>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    © 2026 Drug Label System
+</footer>
+
+<script>
+async function searchMedicine() {
+    const keyword = document.getElementById("searchInput").value;
+
+    if (!keyword.trim()) {
+        alert("검색어를 입력하세요");
+        return;
+    }
+
+    const res = await fetch(`/medicines/search?name=${encodeURIComponent(keyword)}`);
+    const data = await res.json();
+
+    if (!data || data.length === 0) {
+        alert("DB에 없는 약입니다. 직접 입력하세요.");
+        return;
+    }
+
+    const med = data[0];
+
+    document.getElementById("name").value = med.name || "";
+    document.getElementById("description").value = med.description || "";
+    document.getElementById("dosage").value = med.dosage || "";
+    document.getElementById("caution").value = med.caution || "";
+}
+
+async function generateOutput() {
+    const name = document.getElementById("name").value;
+    const description = document.getElementById("description").value;
+    const dosage = document.getElementById("dosage").value;
+    const caution = document.getElementById("caution").value;
+
+    const res = await fetch("/pharmacy/generate", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name,
+            description,
+            dosage,
+            caution
+        })
+    });
+
+    if (!res.ok) {
+        const errorText = await res.text();
+        alert("에러 발생: " + errorText);
+        return;
+    }
+
+    const data = await res.json();
+
+    document.getElementById("nfcResult").innerText = data.nfc_data;
+    document.getElementById("brailleResult").innerText = data.braille_name;
+}
+</script>
+
+</body>
+</html>
+

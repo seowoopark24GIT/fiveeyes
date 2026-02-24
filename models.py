@@ -10,4 +10,11 @@ class Medicine(Base):
     dosage = Column(String) #약 복용법
     caution = Column(String) #주의사항
 
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True)
+    hashed_password = Column(String)
+    role = Column(String) #'admin' or 'pharmacist'
 

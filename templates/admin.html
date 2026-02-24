@@ -1,81 +1,200 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>약품 관리자</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
+<meta charset="UTF-8">
+<title>Admin - Drug Management</title>
 
-        input {
-            margin: 4px 0;
-            width: 300px;
-        }
+<style>
+body {
+    margin: 0;
+    font-family: 'Pretendard', 'Segoe UI', sans-serif;
+    background: #f4f7fb;
+    color: #333;
+}
 
-        button {
-            margin-top: 5px;
-        }
+header {
+    background: linear-gradient(90deg, #4e73df, #2e59d9);
+    color: white;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
 
-        .medicine-box {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 15px;
-        }
+header h1 {
+    margin: 0;
+    font-size: 20px;
+}
 
-        .warning {
-            color: red;
-            font-weight: bold;
-        }
-    </style>
+.logout-btn {
+    background: white;
+    color: #2e59d9;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.logout-btn:hover {
+    background: #e2e6f5;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #4e73df;
+}
+
+.warning {
+    background: #fff3cd;
+    padding: 15px;
+    border-radius: 10px;
+    color: #856404;
+    margin-bottom: 25px;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+input:focus {
+    outline: none;
+    border-color: #4e73df;
+    box-shadow: 0 0 5px rgba(78,115,223,0.4);
+}
+
+button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.primary-btn {
+    background: #4e73df;
+    color: white;
+}
+
+.primary-btn:hover {
+    background: #2e59d9;
+}
+
+.danger-btn {
+    background: #e74a3b;
+    color: white;
+}
+
+.danger-btn:hover {
+    background: #c0392b;
+}
+
+.search-row {
+    display: flex;
+    gap: 10px;
+}
+
+.search-row input {
+    flex: 1;
+}
+
+.medicine-box {
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    background: #f9fbff;
+}
+</style>
 </head>
+
 <body>
 
-<h1>약품 관리자 페이지</h1>
+<header>
+    <h1>🛠 관리자 - 약품 관리 시스템</h1>
+    <button class="logout-btn" onclick="goDocs()">API Docs</button>
+    <button class="logout-btn" onclick="logout()">로그아웃</button>
+</header>
 
-<p class="warning">
-⚠️ 이 페이지는 관리자(개발자/약국 시스템 관리자)용입니다.  
-수정·삭제 시 즉시 DB에 반영됩니다.
-</p >
+<div class="container">
 
-<h2>약 추가</h2>
+    <div class="warning">
+        ⚠️ 이 페이지는 관리자 전용입니다.  
+        수정 및 삭제는 즉시 DB에 반영됩니다.
+    </div>
 
-<div class="medicine-box">
-    <label>약 이름</label><br>
-    <input id="new-name"><br>
+    <!-- 약 추가 -->
+    <div class="card">
+        <h2>1️⃣ 약 추가</h2>
 
-    <label>한 줄 설명</label><br>
-    <input id="new-desc"><br>
+        <input id="new-name" placeholder="약 이름">
+        <input id="new-desc" placeholder="한 줄 설명">
+        <input id="new-dosage" placeholder="복용방법">
+        <input id="new-caution" placeholder="주의사항">
 
-    <label>복용방법</label><br>
-    <input id="new-dosage"><br>
+        <button class="primary-btn" onclick="createMedicine()">추가</button>
+    </div>
 
-    <label>주의사항</label><br>
-    <input id="new-caution"><br>
+    <!-- 검색 -->
+    <div class="card">
+        <h2>2️⃣ 약 검색</h2>
+        <div class="search-row">
+            <input type="text" id="searchInput" placeholder="약 이름 입력">
+            <button class="primary-btn" onclick="searchMedicine()">검색</button>
+        </div>
+    </div>
 
-    <button onclick="createMedicine()">추가</button>
+    <!-- 목록 -->
+    <div class="card">
+        <h2>3️⃣ 검색 결과</h2>
+        <div id="medicineList"></div>
+    </div>
+
 </div>
 
-<hr>
-
-<h2>약 검색</h2>
-<input type="text" id="searchInput" placeholder="약 이름 입력">
-<button onclick="searchMedicine()">검색</button>
-
-<hr>
-
-<h2>약 목록</h2>
-<div id="medicineList"></div>
-
 <script>
+function logout() {
+    window.location.href = "/login";
+}
+
+function goDocs() {
+    window.location.href = "/docs";
+}
+
 async function searchMedicine() {
     const keyword = document.getElementById("searchInput").value;
     if (!keyword.trim()) return;
 
-    const res = await fetch(`/medicines/search?name=${keyword}`);
-    const data = await res.json();
+    const res = await fetch(`/medicines/search?name=${encodeURIComponent(keyword)}`, {});
 
+    if (!res.ok) {
+        alert("검색 실패 (권한 또는 서버 문제)");
+        return;
+    }
+
+    const data = await res.json();
     const list = document.getElementById("medicineList");
     list.innerHTML = "";
 
@@ -89,22 +208,15 @@ async function searchMedicine() {
         div.className = "medicine-box";
 
         div.innerHTML = `
-            <b>ID:</b> ${med.id}<br>
+            <b>ID:</b> ${med.id}<br><br>
 
-            <label>약 이름</label><br>
-            <input id="name-${med.id}" value="${med.name}"><br>
+            <input id="name-${med.id}" value="${med.name}">
+            <input id="desc-${med.id}" value="${med.description || ""}">
+            <input id="dosage-${med.id}" value="${med.dosage}">
+            <input id="caution-${med.id}" value="${med.caution}">
 
-            <label>한 줄 설명</label><br>
-            <input id="desc-${med.id}" value="${med.description || ""}"><br>
-
-            <label>복용방법</label><br>
-            <input id="dosage-${med.id}" value="${med.dosage}"><br>
-
-            <label>주의사항</label><br>
-            <input id="caution-${med.id}" value="${med.caution}"><br>
-
-            <button onclick="updateMedicine(${med.id})">수정</button>
-            <button onclick="deleteMedicine(${med.id})">삭제</button>
+            <button class="primary-btn" onclick="updateMedicine(${med.id})">수정</button>
+            <button class="danger-btn" onclick="deleteMedicine(${med.id})">삭제</button>
         `;
 
         list.appendChild(div);
@@ -112,37 +224,35 @@ async function searchMedicine() {
 }
 
 async function updateMedicine(id) {
-    const name = document.getElementById(`name-${id}`).value;
-    const description = document.getElementById(`desc-${id}`).value;
-    const dosage = document.getElementById(`dosage-${id}`).value;
-    const caution = document.getElementById(`caution-${id}`).value;
-
-    const ok = confirm("이 약 정보를 수정하시겠습니까?");
-    if (!ok) return;
+    if (!confirm("이 약 정보를 수정하시겠습니까?")) return;
 
     await fetch(`/medicines/${id}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            name: name,
-            description: description,
-            dosage: dosage,
-            caution: caution
-        })
-    });
+    method: "PUT",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        name: document.getElementById(`name-${id}`).value,
+        description: document.getElementById(`desc-${id}`).value,
+        dosage: document.getElementById(`dosage-${id}`).value,
+        caution: document.getElementById(`caution-${id}`).value
+    })
+});
 
     alert("수정 완료");
 }
 
 async function deleteMedicine(id) {
-    const ok = confirm("⚠️ 정말 삭제하시겠습니까? (복구 불가)");
-    if (!ok) return;
+    if (!confirm("⚠️ 정말 삭제하시겠습니까? (복구 불가)")) return;
 
-    await fetch(`/medicines/${id}`, {
+    const res = await fetch(`/medicines/${id}`, {
         method: "DELETE"
     });
+
+    if (!res.ok) {
+        alert("삭제 실패 (권한 또는 서버 오류)");
+        return;
+    }
 
     alert("삭제 완료");
     searchMedicine();
@@ -161,28 +271,22 @@ async function createMedicine() {
 
     await fetch("/medicines", {
         method: "POST",
-        headers: {
+        headers:{
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-            name: name,
-            description: description,
-            dosage: dosage,
-            caution: caution
-        })
+        body: JSON.stringify({ name, description, dosage, caution })
     });
 
     alert("추가 완료!");
 
-    // 입력칸 초기화
     document.getElementById("new-name").value = "";
     document.getElementById("new-desc").value = "";
     document.getElementById("new-dosage").value = "";
     document.getElementById("new-caution").value = "";
 
-    // 바로 검색 다시 실행
     searchMedicine();
 }
+
 </script>
 
 </body>

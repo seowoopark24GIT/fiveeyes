@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Drug Label System</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Pretendard', 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #4e73df, #1cc88a);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #333;
+}
+
+.container {
+    background: rgba(255,255,255,0.95);
+    padding: 60px 50px;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    text-align: center;
+    width: 420px;
+    backdrop-filter: blur(10px);
+}
+
+h1 {
+    margin-bottom: 8px;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.subtitle {
+    margin-bottom: 45px;
+    font-size: 14px;
+    color: #666;
+    letter-spacing: 1px;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.admin-btn {
+    background: linear-gradient(45deg, #4e73df, #2e59d9);
+    color: white;
+}
+
+.admin-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.pharmacy-btn {
+    background: linear-gradient(45deg, #1cc88a, #17a673);
+    color: white;
+}
+
+.pharmacy-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #aaa;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Drug Label System</h1>
+    <div class="subtitle">점자 의약품 출력 관리 시스템</div>
+
+    <button class="btn admin-btn"
+        onclick="location.href='/login'">
+        🔐 관리자 로그인
+    </button>
+
+    <button class="btn pharmacy-btn"
+        onclick="location.href='/pharmacy'">
+        💊 약사 바로가기
+    </button>
+
+    <div class="footer">
+        © 2026 Drug Label Project
+    </div>
+</div>
+
+</body>
+</html>
