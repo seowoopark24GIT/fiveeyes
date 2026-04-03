@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException, Query, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
+
 
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -108,6 +110,15 @@ def convert_to_braille(text: str):
 # 앱 생성 + 세션 미들웨어
 # =========================
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.add_middleware(SessionMiddleware, secret_key="supersecretkey")
 
 templates = Jinja2Templates(directory="templates")
@@ -150,22 +161,22 @@ def admin_only(
 # =========================
 # INDEX
 # =========================
-@app.get("/", response_class=HTMLResponse)
-def index(request: Request):
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request}
-    )
+# @app.get("/", response_class=HTMLResponse)
+# def index(request: Request):
+#     return templates.TemplateResponse(
+#         "index.html",
+#         {"request": request}
+#     )
 
 # =========================
 # 로그인 페이지
 # =========================
-@app.get("/login", response_class=HTMLResponse)
-def login_page(request: Request):
-    return templates.TemplateResponse(
-        "login.html",
-        {"request": request}
-    )
+# @app.get("/login", response_class=HTMLResponse)
+# def login_page(request: Request):
+#     return templates.TemplateResponse(
+#         "login.html",
+#         {"request": request}
+#     )
 
 # =========================
 # 로그인 처리 (세션 저장)
@@ -203,28 +214,28 @@ def logout(request: Request):
 # =========================
 # 관리자 페이지 (보호)
 # =========================
-@app.get("/admin", response_class=HTMLResponse)
-def admin_page(
-    request: Request,
-    user: User = Depends(admin_only)
-):
-    if isinstance(user, RedirectResponse):
-        return user
+# @app.get("/admin", response_class=HTMLResponse)
+# def admin_page(
+#     request: Request,
+#     user: User = Depends(admin_only)
+# ):
+#     if isinstance(user, RedirectResponse):
+#         return user
 
-    return templates.TemplateResponse(
-        "admin.html",
-        {"request": request}
-    )
+#     return templates.TemplateResponse(
+#         "admin.html",
+#         {"request": request}
+#     )
 
 # =========================
 # 약사용 페이지 (오픈)
 # =========================
-@app.get("/pharmacy", response_class=HTMLResponse)
-def pharmacy_page(request: Request):
-    return templates.TemplateResponse(
-        "pharmacy.html",
-        {"request": request}
-    )
+# @app.get("/pharmacy", response_class=HTMLResponse)
+# def pharmacy_page(request: Request):
+#     return templates.TemplateResponse(
+#         "pharmacy.html",
+#         {"request": request}
+#     )
 
 # =========================
 # 약 추가
