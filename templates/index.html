@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시각장애인 복약 AI 접근성 시스템</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Pretendard', 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #4e73df, #1cc88a);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #333;
+}
+
+.container {
+    background: rgba(255,255,255,0.96);
+    padding: 56px 48px;
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+    text-align: center;
+    width: 400px;
+    backdrop-filter: blur(10px);
+}
+
+h1 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    color: #2d3748;
+}
+
+.subtitle {
+    font-size: 13px;
+    color: #718096;
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    margin-bottom: 16px;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    color: white;
+}
+
+.btn-pharmacist {
+    background: linear-gradient(45deg, #4e73df, #2e59d9);
+}
+.btn-pharmacist:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(78,115,223,0.35);
+}
+
+.footer {
+    margin-top: 28px;
+    font-size: 12px;
+    color: #a0aec0;
+    line-height: 1.8;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>복약 AI 접근성 시스템</h1>
+    <div class="subtitle">
+        시각장애인을 위한 점자라벨 · NFC · AI 음성 안내
+    </div>
+
+    <a href="/login" class="btn btn-pharmacist">
+        약사 로그인
+    </a>
+
+    <div class="footer">
+        약국에서 약사가 약 이름을 입력하면<br>
+        점자 라벨과 NFC 태그가 자동 생성됩니다.<br><br>
+        © 2026 복약 AI 접근성 프로젝트
+    </div>
+</div>
+
+</body>
+</html>

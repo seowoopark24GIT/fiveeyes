@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ item_name }} — 의약품 안내</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --accent: #38bdf8;
+    --green: #4ade80;
+    --text: #f1f5f9;
+    --sub: #94a3b8;
+    --warn: #fbbf24;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Pretendard', 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px 40px;
+}
+
+/* 상단 약 이름 */
+.drug-title {
+    font-size: 36px;
+    font-weight: 800;
+    text-align: center;
+    color: var(--accent);
+    margin-top: 16px;
+    line-height: 1.2;
+}
+.drug-sub {
+    font-size: 14px;
+    color: var(--sub);
+    text-align: center;
+    margin-top: 6px;
+}
+
+/* 음성 재생 상태 표시 */
+.voice-status {
+    margin: 28px auto;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--accent);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+.voice-status.playing {
+    border-color: var(--green);
+    box-shadow: 0 0 0 0 rgba(74,222,128,0.4);
+    animation: pulse 1.5s infinite;
+}
+.voice-status:hover { transform: scale(1.05); }
+
+@keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0.4); }
+    70%  { box-shadow: 0 0 0 16px rgba(74,222,128,0); }
+    100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+}
+
+.voice-icon { font-size: 42px; }
+.voice-label {
+    font-size: 11px;
+    color: var(--sub);
+    margin-top: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* 현재 재생 중인 문장 */
+.now-speaking {
+    width: 100%;
+    max-width: 480px;
+    min-height: 60px;
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 18px 20px;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--green);
+    text-align: center;
+    line-height: 1.5;
+    margin-bottom: 24px;
+    border: 1px solid rgba(74,222,128,0.3);
+    transition: opacity 0.3s;
+}
+.now-speaking.empty { color: var(--sub); font-weight: 400; font-size: 15px; }
+
+/* 안내 문장 리스트 */
+.script-list {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+}
+
+.script-item {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.5;
+    border-left: 4px solid transparent;
+    transition: all 0.2s;
+    opacity: 0.6;
+}
+.script-item.active {
+    opacity: 1;
+    border-left-color: var(--green);
+    background: #1e3a2f;
+}
+.script-item.done {
+    opacity: 0.4;
+    border-left-color: #334155;
+}
+
+/* 알약 이미지 */
+.pill-image {
+    width: 160px;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 2px solid var(--surface);
+    margin-bottom: 20px;
+    display: block;
+}
+
+/* 재생 컨트롤 버튼 */
+.controls {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    max-width: 480px;
+}
+.ctrl-btn {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.ctrl-replay { background: var(--accent); color: #0f172a; }
+.ctrl-replay:hover { filter: brightness(1.1); }
+.ctrl-pause  { background: var(--surface); color: var(--text); border: 1px solid #334155; }
+.ctrl-pause:hover { background: #334155; }
+
+/* 로딩 스피너 */
+.loading-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin: 40px 0;
+}
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--surface);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 스크린리더 전용 (숨김) */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+}
+</style>
+</head>
+<body>
+
+<!-- 스크린리더 안내 -->
+<div class="sr-only" aria-live="polite" id="ariaLive"></div>
+
+{% if voice_script %}
+
+<div class="drug-title" role="heading" aria-level="1">{{ item_name }}</div>
+<div class="drug-sub" aria-label="의약품 음성 안내 페이지">화면을 탭하면 음성 안내가 시작됩니다</div>
+
+{% if item_image %}
+<img src="{{ item_image }}" class="pill-image" alt="{{ item_name }} 알약 이미지">
+{% endif %}
+
+<div
+    class="voice-status"
+    id="voiceStatus"
+    onclick="togglePlay()"
+    role="button"
+    aria-label="음성 안내 재생"
+    tabindex="0"
+>
+    <div class="voice-icon" id="voiceIcon">🔊</div>
+    <div class="voice-label" id="voiceLabel">탭하여 듣기</div>
+</div>
+
+<div class="now-speaking empty" id="nowSpeaking" aria-live="polite">
+    버튼을 탭하면 음성 안내가 시작됩니다
+</div>
+
+<div class="script-list" id="scriptList">
+{% for line in voice_script %}
+    <div class="script-item" id="item-{{ loop.index0 }}" role="listitem">{{ line }}</div>
+{% endfor %}
+</div>
+
+<div class="controls">
+    <button class="ctrl-btn ctrl-replay" onclick="replay()" aria-label="처음부터 다시 듣기">
+        처음부터 다시 듣기
+    </button>
+    <button class="ctrl-btn ctrl-pause" onclick="togglePlay()" id="pauseBtn" aria-label="일시정지">
+        일시정지
+    </button>
+</div>
+
+{% else %}
+
+<div class="loading-overlay" role="status" aria-label="의약품 정보 불러오는 중">
+    <div class="spinner"></div>
+    <div style="color: var(--sub); font-size: 16px;">의약품 정보를 분석하는 중입니다…</div>
+    <div style="color: var(--sub); font-size: 13px; margin-top: 4px;">잠시만 기다려주세요</div>
+</div>
+
+{% endif %}
+
+<script>
+const SCRIPT = {{ voice_script_json | safe }};
+let idx = 0;
+let isPlaying = false;
+let isPaused = false;
+
+function setIcon(playing) {
+    document.getElementById('voiceIcon').textContent  = playing ? '🔊' : '🔇';
+    document.getElementById('voiceLabel').textContent = playing ? '재생 중' : '탭하여 듣기';
+    document.getElementById('voiceStatus').classList.toggle('playing', playing);
+    document.getElementById('pauseBtn').textContent   = playing ? '일시정지' : '재개';
+}
+
+function highlightItem(i) {
+    document.querySelectorAll('.script-item').forEach((el, j) => {
+        el.classList.remove('active', 'done');
+        if (j < i) el.classList.add('done');
+        if (j === i) el.classList.add('active');
+    });
+
+    const nowEl = document.getElementById('nowSpeaking');
+    if (SCRIPT[i]) {
+        nowEl.textContent = SCRIPT[i];
+        nowEl.classList.remove('empty');
+        document.getElementById('ariaLive').textContent = SCRIPT[i];
+    }
+}
+
+function speakNext() {
+    if (idx >= SCRIPT.length) {
+        setIcon(false);
+        isPlaying = false;
+        document.getElementById('nowSpeaking').textContent = '안내가 완료되었습니다';
+        document.querySelectorAll('.script-item').forEach(el => {
+            el.classList.remove('active');
+            el.classList.add('done');
+        });
+        return;
+    }
+
+    highlightItem(idx);
+    const utter = new SpeechSynthesisUtterance(SCRIPT[idx]);
+    utter.lang  = 'ko-KR';
+    utter.rate  = 0.9;
+    utter.pitch = 1.0;
+
+    utter.onend = () => {
+        idx++;
+        if (!isPaused) setTimeout(speakNext, 600);
+    };
+
+    utter.onerror = (e) => {
+        if (e.error !== 'interrupted') {
+            idx++;
+            setTimeout(speakNext, 600);
+        }
+    };
+
+    window.speechSynthesis.speak(utter);
+}
+
+function play() {
+    if (isPlaying && !isPaused) return;
+    isPlaying = true;
+    isPaused  = false;
+    setIcon(true);
+    if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+    } else {
+        speakNext();
+    }
+}
+
+function togglePlay() {
+    if (!isPlaying) {
+        play();
+    } else if (!isPaused) {
+        isPaused = true;
+        window.speechSynthesis.pause();
+        setIcon(false);
+    } else {
+        isPaused = false;
+        window.speechSynthesis.resume();
+        setIcon(true);
+    }
+}
+
+function replay() {
+    window.speechSynthesis.cancel();
+    idx       = 0;
+    isPlaying = false;
+    isPaused  = false;
+    document.querySelectorAll('.script-item').forEach(el => el.classList.remove('active','done'));
+    setTimeout(play, 300);
+}
+
+// 페이지 로드 시 자동 재생 시도
+// NFC 탭이 사용자 제스처이므로 Android Chrome은 자동 재생됨
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        if (SCRIPT.length > 0) play();
+    }, 800);
+});
+
+// 키보드 접근성
+document.getElementById('voiceStatus')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+</script>
+</body>
+</html>
