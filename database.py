@@ -4,10 +4,14 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR,'pharmacy.db')}" #DB 파일 위치 
+_default_sqlite = f"sqlite:///{os.path.join(BASE_DIR, 'pharmacy.db')}"
+DATABASE_URL = os.getenv("DATABASE_URL", _default_sqlite)
+
+_connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
 engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False} #DB랑 실제로 연결하는 엔진
+    DATABASE_URL,
+    connect_args=_connect_args,
 )
 
 SessionLocal = sessionmaker(
