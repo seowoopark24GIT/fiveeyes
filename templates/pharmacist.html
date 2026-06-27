@@ -3,139 +3,195 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>약사 시스템 — 점자라벨 · NFC 출력</title>
+<title>소리잇다</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-    font-family: 'Pretendard', 'Segoe UI', sans-serif;
-    background: #f0f4f8;
-    min-height: 100vh;
-    color: #2d3748;
+:root {
+    --bg: #ffffff;
+    --page-bg: #f3f4f6;
+    --surface: #fafafa;
+    --border: #e5e5e5;
+    --text: #0d0d0d;
+    --text-secondary: #6e6e80;
+    --text-muted: #8e8ea0;
+    --accent: #0d0d0d;
+    --accent-hover: #333;
+    --shell-width: 480px;
 }
 
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard', sans-serif;
+    background: var(--page-bg);
+    min-height: 100vh;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+}
+
+.app-shell {
+    max-width: var(--shell-width);
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── 상단 헤더 ── */
 header {
-    background: linear-gradient(135deg, #4e73df, #2e59d9);
-    color: white;
-    padding: 18px 32px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
-header h1 { font-size: 20px; font-weight: 700; }
-header .sub { font-size: 13px; opacity: 0.8; margin-top: 2px; }
-
-.logout-btn {
-    background: rgba(255,255,255,0.2);
-    border: 1px solid rgba(255,255,255,0.4);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
+.logo {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text);
     text-decoration: none;
 }
-.logout-btn:hover { background: rgba(255,255,255,0.3); }
 
+.logout-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 6px 0;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.logout-btn:hover { color: var(--text); }
+
+/* ── 레이아웃 ── */
 main {
-    max-width: 720px;
-    margin: 40px auto;
-    padding: 0 20px;
+    flex: 1;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 24px;
 }
 
-.card {
-    background: white;
-    border-radius: 16px;
-    padding: 28px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+.section {
+    width: 100%;
+    padding: 20px 16px 24px;
 }
 
-.card h2 {
-    font-size: 17px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: #2d3748;
-}
-
-.search-row {
+.section.main-section {
+    flex: 1;
     display: flex;
-    gap: 12px;
+    flex-direction: column;
+    padding-bottom: 16px;
 }
+
+#result-section {
+    display: none;
+    border-top: 1px solid var(--border);
+}
+
+.section h2 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+    letter-spacing: -0.02em;
+}
+
+.card-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+
+/* ── 입력 / 버튼 ── */
+.search-row { display: flex; gap: 8px; }
 
 .search-input {
     flex: 1;
-    padding: 14px 18px;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 16px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 15px;
     outline: none;
-    transition: border-color 0.2s;
+    background: var(--bg);
+    transition: border-color 0.15s;
 }
-.search-input:focus { border-color: #4e73df; }
+.search-input:focus { border-color: var(--text); }
 
 .btn {
-    padding: 14px 24px;
+    padding: 10px 18px;
     border: none;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 600;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.15s;
     white-space: nowrap;
 }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-primary { background: #4e73df; color: white; }
-.btn-primary:hover:not(:disabled) { background: #2e59d9; transform: translateY(-1px); }
-.btn-success { background: #1cc88a; color: white; width: 100%; font-size: 17px; padding: 18px; margin-top: 8px; }
-.btn-success:hover:not(:disabled) { background: #17a673; transform: translateY(-1px); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+.btn-success {
+    background: var(--accent);
+    color: #fff;
+    width: 100%;
+    font-size: 15px;
+    padding: 14px;
+    margin-top: 8px;
+}
+.btn-success:hover:not(:disabled) { background: var(--accent-hover); }
 
-/* 검색 결과 카드 */
-#result-section { display: none; }
+/* ── 검색 결과 ── */
 
 .drug-header {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     align-items: flex-start;
     margin-bottom: 20px;
 }
 
 .drug-image {
-    width: 100px;
-    height: 100px;
+    width: 88px;
+    height: 88px;
     object-fit: cover;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
     flex-shrink: 0;
-    background: #f7fafc;
+    background: var(--surface);
 }
 .drug-image-placeholder {
-    width: 100px;
-    height: 100px;
-    border-radius: 12px;
-    border: 2px dashed #cbd5e0;
+    width: 88px;
+    height: 88px;
+    border-radius: 8px;
+    border: 1px dashed var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-size: 30px;
-    color: #a0aec0;
+    font-size: 28px;
+    color: var(--text-muted);
+    background: var(--surface);
 }
 
 .drug-name {
-    font-size: 22px;
-    font-weight: 700;
-    color: #2d3748;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
     margin-bottom: 6px;
+    letter-spacing: -0.02em;
 }
 .drug-shape {
-    font-size: 13px;
-    color: #718096;
-    background: #edf2f7;
-    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
     border-radius: 20px;
     display: inline-block;
 }
@@ -143,23 +199,23 @@ main {
 .info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 12px;
     margin-bottom: 20px;
 }
 @media (max-width: 500px) { .info-grid { grid-template-columns: 1fr; } }
 
 .info-item label {
     display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: #a0aec0;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.04em;
     margin-bottom: 4px;
 }
 .info-item p {
     font-size: 14px;
-    color: #4a5568;
+    color: var(--text-secondary);
     line-height: 1.6;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -167,214 +223,216 @@ main {
     overflow: hidden;
 }
 
-/* 수동 입력 패널 */
+/* ── 수동 입력 ── */
 .manual-panel {
     margin-top: 16px;
     padding: 16px;
-    border: 2px dashed #fbb6ce;
-    border-radius: 12px;
-    background: #fff5f7;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    background: var(--surface);
 }
 .manual-panel h3 {
-    font-size: 14px;
-    font-weight: 700;
-    color: #c53030;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
     margin-bottom: 12px;
 }
 .manual-panel .field-row {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     margin-bottom: 12px;
 }
 .manual-panel label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #718096;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
     text-transform: uppercase;
 }
 .manual-panel input,
 .manual-panel textarea {
-    padding: 10px 14px;
-    border: 2px solid #fed7d7;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
     outline: none;
-    background: white;
+    background: var(--bg);
 }
 .manual-panel input:focus,
-.manual-panel textarea:focus { border-color: #fc8181; }
+.manual-panel textarea:focus { border-color: var(--text); }
 .manual-panel textarea { resize: vertical; min-height: 60px; }
 .btn-manual-confirm {
     width: 100%;
-    padding: 12px;
-    background: #e53e3e;
+    padding: 10px;
+    background: var(--accent);
     color: white;
     border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 600;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
     margin-top: 4px;
 }
-.btn-manual-confirm:hover { background: #c53030; }
+.btn-manual-confirm:hover { background: var(--accent-hover); }
 
 .braille-preview {
-    background: #1a202c;
-    color: #68d391;
-    padding: 14px 18px;
-    border-radius: 10px;
-    font-size: 22px;
-    letter-spacing: 4px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 20px;
+    letter-spacing: 3px;
     margin-bottom: 4px;
     word-break: break-all;
 }
 .braille-label {
-    font-size: 12px;
-    color: #a0aec0;
-    margin-bottom: 16px;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
-/* 상태 메시지 */
+/* ── 상태 ── */
 .status-bar {
     display: none;
-    padding: 14px 18px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    margin-top: 12px;
-}
-.status-bar.loading { background: #ebf8ff; color: #2b6cb0; }
-.status-bar.success { background: #f0fff4; color: #276749; }
-.status-bar.error   { background: #fff5f5; color: #c53030; }
-
-.nfc-url {
+    padding: 12px 14px;
+    border-radius: 8px;
     font-size: 13px;
-    color: #4e73df;
-    word-break: break-all;
-    margin-top: 6px;
+    font-weight: 500;
+    margin-top: 12px;
+    border: 1px solid var(--border);
 }
+.status-bar.loading { background: var(--surface); color: var(--text-secondary); }
+.status-bar.success { background: var(--surface); color: var(--text); border-color: #c8e6c9; }
+.status-bar.error   { background: #fff5f5; color: #c53030; border-color: #fed7d7; }
 
-.hw-status {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
+.nfc-url { font-size: 13px; color: var(--text-secondary); word-break: break-all; margin-top: 6px; }
+.nfc-url a { color: var(--text); }
+
+.hw-status { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .hw-badge {
-    padding: 4px 12px;
+    padding: 4px 10px;
     border-radius: 20px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
+    border: 1px solid var(--border);
 }
-.hw-ok  { background: #c6f6d5; color: #276749; }
-.hw-err { background: #fed7d7; color: #c53030; }
+.hw-ok  { background: var(--surface); color: var(--text); }
+.hw-err { background: #fff5f5; color: #c53030; border-color: #fed7d7; }
 
-/* 모드 탭 */
+/* ── 탭 ── */
 .mode-tabs {
     display: flex;
-    gap: 0;
+    gap: 4px;
     margin-bottom: 20px;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 2px solid #e2e8f0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
 }
 .mode-tab {
     flex: 1;
-    padding: 12px;
+    padding: 8px 12px;
     border: none;
-    background: #f7fafc;
-    color: #718096;
-    font-size: 15px;
-    font-weight: 600;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    border-radius: 6px;
+    transition: all 0.15s;
 }
 .mode-tab.active {
-    background: #4e73df;
-    color: white;
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
-.mode-tab:hover:not(.active) { background: #edf2f7; }
+.mode-tab:hover:not(.active) { color: var(--text); }
 
-/* 봉지약 폼 */
+/* ── 봉지약 ── */
 .packet-form { display: flex; flex-direction: column; gap: 16px; }
 
 .field-group label {
     display: block;
-    font-size: 12px;
-    font-weight: 700;
-    color: #718096;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.04em;
     margin-bottom: 6px;
 }
 
 .field-input {
     width: 100%;
-    padding: 12px 16px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
     font-size: 15px;
     outline: none;
-    transition: border-color 0.2s;
+    background: var(--bg);
     font-family: inherit;
+    transition: border-color 0.15s;
 }
-.field-input:focus { border-color: #4e73df; }
+.field-input:focus { border-color: var(--text); }
 textarea.field-input { resize: vertical; min-height: 70px; }
 
-/* 약 목록 */
-.drug-list { display: flex; flex-direction: column; gap: 10px; }
+.drug-list { display: flex; flex-direction: column; gap: 8px; }
 
 .drug-row {
     display: grid;
     grid-template-columns: 1fr 70px auto auto;
     gap: 8px;
     align-items: center;
-    background: #f7fafc;
-    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     padding: 10px 12px;
 }
 
 .drug-row input {
-    padding: 8px 12px;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
     font-size: 14px;
     outline: none;
-    background: white;
+    background: var(--bg);
     font-family: inherit;
 }
-.drug-row input:focus { border-color: #4e73df; }
+.drug-row input:focus { border-color: var(--text); }
 
 .btn-lookup {
-    padding: 8px 14px;
-    border: none;
-    border-radius: 8px;
-    background: #ebf4ff;
-    color: #4e73df;
-    font-size: 13px;
-    font-weight: 600;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
 }
-.btn-lookup:hover { background: #bee3f8; }
+.btn-lookup:hover { background: var(--surface); }
 
 .btn-remove {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    background: #fff5f5;
-    color: #c53030;
-    font-size: 16px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text-secondary);
+    font-size: 14px;
     cursor: pointer;
 }
-.btn-remove:hover { background: #fed7d7; }
+.btn-remove:hover { background: var(--surface); }
 
 .drug-efficacy {
     grid-column: 1 / -1;
     font-size: 13px;
-    color: #4a5568;
-    background: #edf2f7;
+    color: var(--text-secondary);
+    background: var(--bg);
+    border: 1px solid var(--border);
     padding: 6px 10px;
     border-radius: 6px;
     display: none;
@@ -383,40 +441,144 @@ textarea.field-input { resize: vertical; min-height: 70px; }
 
 .btn-add-drug {
     padding: 10px;
-    border: 2px dashed #cbd5e0;
-    border-radius: 10px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
     background: none;
-    color: #718096;
+    color: var(--text-secondary);
     font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.15s;
+}
+.btn-add-drug:hover { border-color: var(--text); color: var(--text); background: var(--surface); }
+
+/* ── 카메라 ── */
+.camera-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+}
+.camera-preview {
+    width: calc(100% + 32px);
+    margin: 0 -16px;
+    flex: 1;
+    min-height: 360px;
+    max-height: 58vh;
+    aspect-ratio: 3 / 4;
+    border-radius: 0;
+    background: #111;
+    object-fit: cover;
+    border: none;
+}
+.camera-actions { display: flex; gap: 8px; }
+.btn-camera {
+    flex: 1;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.btn-capture { background: var(--accent); color: #fff; }
+.btn-capture:hover { background: var(--accent-hover); }
+.btn-retake {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+.btn-retake:hover { background: var(--surface); }
+
+.confirm-panel {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+.confirm-panel.visible { display: flex; }
+.confirm-panel p { font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
+.confirm-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn-confirm-yes,
+.btn-confirm-no {
+    min-height: 64px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
-    width: 100%;
+    transition: background 0.15s;
 }
-.btn-add-drug:hover { border-color: #4e73df; color: #4e73df; background: #ebf4ff; }
+.btn-confirm-yes { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-confirm-yes:hover { background: var(--accent-hover); }
+.btn-confirm-no  { background: var(--bg); color: var(--text); }
+.btn-confirm-no:hover  { background: var(--surface); }
+
+.voice-live {
+    min-height: 20px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
 </style>
 </head>
 <body>
 
+<div class="app-shell">
 <header>
-    <div>
-        <h1>약사 시스템</h1>
-        <div class="sub">점자라벨 · NFC 태그 출력</div>
-    </div>
+    <a href="/" class="logo">소리잇다</a>
     <a href="/logout" class="logout-btn">로그아웃</a>
 </header>
 
 <main>
-    <!-- 모드 선택 + 검색 카드 -->
-    <div class="card">
+    <div class="section main-section">
         <div class="mode-tabs">
-            <button class="mode-tab active" id="tabSingle" onclick="switchMode('single')">단일약</button>
-            <button class="mode-tab" id="tabPacket" onclick="switchMode('packet')">봉지약</button>
+            <button class="mode-tab active" id="tabCamera" onclick="switchMode('camera')">촬영</button>
+            <button class="mode-tab" id="tabSingle" onclick="switchMode('single')">이름 검색</button>
+            <button class="mode-tab" id="tabPacket" onclick="switchMode('packet')">묶음 제품</button>
+        </div>
+
+        <!-- 카메라 + 음성 확인 -->
+        <div id="camera-mode">
+            <h2>제품 촬영 · 음성 확인</h2>
+            <p class="card-desc">
+                웹캠으로 제품을 촬영하면 음성으로 설명합니다. 맞으면 바로 라벨을 출력합니다.
+            </p>
+            <div class="camera-wrap">
+                <video id="cameraVideo" class="camera-preview" autoplay playsinline muted aria-label="웹캠 미리보기"></video>
+                <canvas id="cameraCanvas" style="display:none"></canvas>
+                <div class="camera-actions">
+                    <button class="btn-camera btn-capture" id="captureBtn" onclick="captureAndIdentify()" aria-label="촬영하고 식별하기">
+                        촬영
+                    </button>
+                    <button class="btn-camera btn-retake" id="retakeBtn" onclick="resetCameraFlow()" aria-label="다시 촬영">
+                        다시 찍기
+                    </button>
+                </div>
+                <div id="cameraStatus" class="status-bar"></div>
+                <div id="voiceLive" class="voice-live" aria-live="polite"></div>
+                <div id="confirmPanel" class="confirm-panel" role="region" aria-label="제품 확인">
+                    <p id="confirmSummary">—</p>
+                    <div class="confirm-buttons">
+                        <button class="btn-confirm-yes" id="confirmYesBtn" onclick="confirmIdentification(true)" aria-label="맞음, 출력하기">
+                            맞음
+                        </button>
+                        <button class="btn-confirm-no" id="confirmNoBtn" onclick="confirmIdentification(false)" aria-label="틀림, 다시 찍기">
+                            다시
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- 단일약 폼 -->
-        <div id="single-mode">
-            <h2>약 이름 검색</h2>
+        <div id="single-mode" style="display:none">
+            <h2>제품 이름 검색</h2>
             <div class="search-row">
                 <input
                     id="searchInput"
@@ -433,10 +595,10 @@ textarea.field-input { resize: vertical; min-height: 70px; }
 
         <!-- 봉지약 폼 -->
         <div id="packet-mode" style="display:none">
-            <h2>봉지약 정보 입력</h2>
+            <h2>묶음 제품 입력</h2>
             <div class="packet-form">
                 <div class="field-group">
-                    <label>봉지 라벨 <span style="color:#c53030">*</span> (점자 출력용, 짧게)</label>
+                    <label>묶음 라벨 <span style="color:#c53030">*</span> (점자 출력용, 짧게)</label>
                     <input id="packetLabel" class="field-input" type="text" placeholder="예: 감기약, 혈압약" oninput="updatePacketBraille()" />
                 </div>
                 <div class="field-group">
@@ -448,9 +610,9 @@ textarea.field-input { resize: vertical; min-height: 70px; }
                     <textarea id="packetPurpose" class="field-input" placeholder="예: 감기 증상 완화를 위한 약이 들어있습니다"></textarea>
                 </div>
                 <div class="field-group">
-                    <label>약 목록 <span style="color:#c53030">*</span></label>
+                    <label>제품 목록 <span style="color:#c53030">*</span></label>
                     <div class="drug-list" id="drugList"></div>
-                    <button class="btn-add-drug" onclick="addDrugRow()">+ 약 추가</button>
+                    <button class="btn-add-drug" onclick="addDrugRow()">+ 제품 추가</button>
                 </div>
                 <div class="field-group">
                     <label>추가 주의사항 (선택)</label>
@@ -461,16 +623,15 @@ textarea.field-input { resize: vertical; min-height: 70px; }
                 <div class="braille-preview" id="packetBraillePreview">라벨을 입력하세요</div>
 
                 <button class="btn btn-success" id="packetGenerateBtn" onclick="generatePacket()">
-                    봉지약 라벨 출력 + NFC 태그 쓰기
+                    묶음 라벨 출력 + NFC 태그 쓰기
                 </button>
                 <div id="packetStatus" class="status-bar"></div>
             </div>
         </div>
     </div>
 
-    <!-- 단일약 검색 결과 + 출력 -->
-    <div class="card" id="result-section">
-        <h2>의약품 정보 확인</h2>
+    <div class="section" id="result-section">
+        <h2>제품 정보</h2>
 
         <div class="drug-header">
             <div id="drugImageWrap"></div>
@@ -509,10 +670,215 @@ textarea.field-input { resize: vertical; min-height: 70px; }
         <div id="generateStatus" class="status-bar"></div>
     </div>
 </main>
+</div>
 
 <script>
 let currentDrug = null;
 let currentSearchQuery = null;  // 약사가 입력한 검색어 (점자 출력용)
+let cameraStream = null;
+let pendingIdentify = null;
+let speechRecognition = null;
+let isListening = false;
+let isSpeaking = false;
+
+// ── 카메라 + 음성 확인 ──────────────────────────────
+
+async function initCamera() {
+    if (cameraStream) return;
+    try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' },
+            audio: false,
+        });
+        document.getElementById('cameraVideo').srcObject = cameraStream;
+    } catch (e) {
+        showStatus('cameraStatus', 'error', '카메라를 사용할 수 없습니다. 브라우저 권한을 확인하세요.');
+        speakText('카메라를 사용할 수 없습니다.');
+    }
+}
+
+function stopCamera() {
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+    }
+}
+
+function resetCameraFlow() {
+    stopListening();
+    pendingIdentify = null;
+    document.getElementById('confirmPanel').classList.remove('visible');
+    hideStatus('cameraStatus');
+    setVoiceLive('');
+    document.getElementById('captureBtn').disabled = false;
+    initCamera();
+    speakText('다시 촬영해 주세요.');
+}
+
+async function captureAndIdentify() {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('cameraCanvas');
+    if (!cameraStream) {
+        await initCamera();
+        if (!cameraStream) return;
+    }
+
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    const imageBase64 = canvas.toDataURL('image/jpeg', 0.85);
+
+    document.getElementById('captureBtn').disabled = true;
+    document.getElementById('confirmPanel').classList.remove('visible');
+    showStatus('cameraStatus', 'loading', '제품을 분석 중입니다...');
+    setVoiceLive('분석 중...');
+    speakText('제품을 분석 중입니다.');
+
+    try {
+        const res = await fetch('/pharmacist/identify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image_base64: imageBase64 }),
+        });
+
+        if (!res.ok) {
+            let detail = '식별에 실패했습니다.';
+            try {
+                const err = await res.json();
+                detail = typeof err.detail === 'string'
+                    ? err.detail
+                    : Array.isArray(err.detail)
+                        ? err.detail.map(d => d.msg || d).join(', ')
+                        : detail;
+            } catch (_) {}
+            showStatus('cameraStatus', 'error', detail);
+            speakText(detail + ' 다시 촬영해 주세요.');
+            document.getElementById('captureBtn').disabled = false;
+            return;
+        }
+
+        pendingIdentify = await res.json();
+        hideStatus('cameraStatus');
+
+        const summary = (pendingIdentify.voiceScript || []).join(' ');
+        document.getElementById('confirmSummary').textContent = summary;
+        document.getElementById('confirmPanel').classList.add('visible');
+
+        await speakScript(pendingIdentify.voiceScript || []);
+        startListening();
+    } catch (e) {
+        showStatus('cameraStatus', 'error', '서버 오류: ' + e.message);
+        speakText('서버 오류입니다. 다시 촬영해 주세요.');
+        document.getElementById('captureBtn').disabled = false;
+    }
+}
+
+function confirmIdentification(isYes) {
+    stopListening();
+    if (!pendingIdentify) return;
+
+    if (!isYes) {
+        resetCameraFlow();
+        return;
+    }
+
+    const product = pendingIdentify.product || {};
+    currentDrug = product;
+    currentSearchQuery = pendingIdentify.shortLabel || product.itemName || '';
+    renderResult(product);
+    speakText('확인되었습니다. 라벨을 출력합니다.');
+    setVoiceLive('출력 중...');
+    pendingIdentify = null;
+    document.getElementById('confirmPanel').classList.remove('visible');
+    generateOutput();
+    document.getElementById('captureBtn').disabled = false;
+}
+
+function setVoiceLive(msg) {
+    document.getElementById('voiceLive').textContent = msg || '';
+}
+
+function speakText(text) {
+    return new Promise(resolve => {
+        if (!window.speechSynthesis) { resolve(); return; }
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ko-KR';
+        utter.rate = 0.95;
+        utter.onend = () => resolve();
+        utter.onerror = () => resolve();
+        window.speechSynthesis.speak(utter);
+    });
+}
+
+function speakScript(sentences) {
+    return new Promise(resolve => {
+        if (!window.speechSynthesis || !sentences.length) { resolve(); return; }
+        window.speechSynthesis.cancel();
+        isSpeaking = true;
+        let idx = 0;
+
+        const speakNext = () => {
+            if (idx >= sentences.length) {
+                isSpeaking = false;
+                setVoiceLive('음성 확인을 기다리는 중입니다.');
+                resolve();
+                return;
+            }
+            const utter = new SpeechSynthesisUtterance(sentences[idx]);
+            utter.lang = 'ko-KR';
+            utter.rate = 0.95;
+            setVoiceLive(sentences[idx]);
+            utter.onend = () => { idx++; setTimeout(speakNext, 400); };
+            utter.onerror = () => { idx++; setTimeout(speakNext, 400); };
+            window.speechSynthesis.speak(utter);
+        };
+        speakNext();
+    });
+}
+
+function stopListening() {
+    if (speechRecognition && isListening) {
+        try { speechRecognition.stop(); } catch (_) {}
+    }
+    isListening = false;
+}
+
+function startListening() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        setVoiceLive('음성 인식을 지원하지 않습니다. 버튼을 사용해 주세요.');
+        return;
+    }
+
+    stopListening();
+    speechRecognition = new SpeechRecognition();
+    speechRecognition.lang = 'ko-KR';
+    speechRecognition.interimResults = false;
+    speechRecognition.maxAlternatives = 3;
+    isListening = true;
+
+    speechRecognition.onresult = (event) => {
+        const heard = Array.from(event.results)
+            .map(r => r[0].transcript.trim())
+            .join(' ')
+            .toLowerCase();
+        if (/맞|예|yes|출력|확인/.test(heard) && !/다시|아니|틀/.test(heard)) {
+            confirmIdentification(true);
+        } else if (/다시|아니|틀|no/.test(heard)) {
+            confirmIdentification(false);
+        }
+    };
+
+    speechRecognition.onerror = () => { isListening = false; };
+    speechRecognition.onend = () => {
+        if (isListening && pendingIdentify && !isSpeaking) {
+            try { speechRecognition.start(); } catch (_) {}
+        }
+    };
+
+    try { speechRecognition.start(); } catch (_) {}
+}
 
 async function searchDrug() {
     const name = document.getElementById('searchInput').value.trim();
@@ -564,7 +930,7 @@ function renderResult(drug) {
     if (drug.itemImage) {
         wrap.innerHTML = `<img src="${drug.itemImage}" class="drug-image" alt="알약 이미지" onerror="this.style.display='none'">`;
     } else {
-        wrap.innerHTML = `<div class="drug-image-placeholder">💊</div>`;
+        wrap.innerHTML = `<div class="drug-image-placeholder">—</div>`;
     }
 
     // 점자 미리보기 — 약사가 입력한 짧은 검색어 기준
@@ -607,14 +973,14 @@ async function generateOutput() {
 
         const data = await res.json();
 
-        const printerIcon = data.printer_ok ? '✅' : '⚠️';
-        const nfcIcon = data.nfc_ok ? '✅' : '⚠️';
+        const printerLabel = data.printer_ok ? '점자 프린터 완료' : '점자 프린터 미연결';
+        const nfcLabel = data.nfc_ok ? 'NFC 태그 완료' : 'NFC 태그 미연결';
 
         const statusHtml = `
             출력 완료
             <div class="hw-status">
-                <span class="hw-badge ${data.printer_ok ? 'hw-ok' : 'hw-err'}">${printerIcon} 점자 프린터</span>
-                <span class="hw-badge ${data.nfc_ok ? 'hw-ok' : 'hw-err'}">${nfcIcon} NFC 태그</span>
+                <span class="hw-badge ${data.printer_ok ? 'hw-ok' : 'hw-err'}">${printerLabel}</span>
+                <span class="hw-badge ${data.nfc_ok ? 'hw-ok' : 'hw-err'}">${nfcLabel}</span>
             </div>
             <div class="nfc-url"><a href="${data.nfc_data}" target="_blank">${data.nfc_data}</a></div>
         `;
@@ -683,8 +1049,8 @@ function showManualForm(name) {
         <div class="manual-panel">
             <h3>식약처에서 찾을 수 없습니다 — 직접 입력</h3>
             <div class="field-row">
-                <label>약 이름 *</label>
-                <input id="manualName" type="text" value="${safeName}" placeholder="약 이름" />
+                <label>제품 이름 *</label>
+                <input id="manualName" type="text" value="${safeName}" placeholder="제품 이름" />
             </div>
             <div class="field-row">
                 <label>효능·효과</label>
@@ -705,7 +1071,7 @@ function showManualForm(name) {
 
 function useManualData() {
     const name = document.getElementById('manualName').value.trim();
-    if (!name) { alert('약 이름을 입력하세요.'); return; }
+    if (!name) { alert('제품 이름을 입력하세요.'); return; }
 
     // 수동 입력 데이터로 currentDrug 구성
     currentSearchQuery = name;
@@ -730,18 +1096,31 @@ function useManualData() {
 // ── 모드 전환 ──────────────────────────────
 
 function switchMode(mode) {
+    const isCamera = mode === 'camera';
     const isSingle = mode === 'single';
+    document.getElementById('camera-mode').style.display = isCamera ? '' : 'none';
     document.getElementById('single-mode').style.display = isSingle ? '' : 'none';
-    document.getElementById('packet-mode').style.display = isSingle ? 'none' : '';
+    document.getElementById('packet-mode').style.display = (!isCamera && !isSingle) ? '' : 'none';
+    document.getElementById('tabCamera').classList.toggle('active', isCamera);
     document.getElementById('tabSingle').classList.toggle('active', isSingle);
-    document.getElementById('tabPacket').classList.toggle('active', !isSingle);
-    // 봉지약 탭 전환 시 단일약 결과 숨김, 단일약 탭으로 돌아와도 결과는 currentDrug 있을 때만 표시
+    document.getElementById('tabPacket').classList.toggle('active', !isCamera && !isSingle);
+
+    if (isCamera) {
+        initCamera();
+    } else {
+        stopCamera();
+    }
+
     if (!isSingle) {
         document.getElementById('result-section').style.display = 'none';
     } else if (currentDrug) {
         document.getElementById('result-section').style.display = 'block';
     }
 }
+
+window.addEventListener('load', () => {
+    switchMode('camera');
+});
 
 // ── 봉지약 약 목록 ──────────────────────────
 
@@ -756,10 +1135,10 @@ function addDrugRow() {
     row.dataset.efficacy = '';
     row.dataset.caution = '';
     row.innerHTML = `
-        <input type="text" class="drug-name-input" placeholder="약 이름 (예: 게보린)" />
+        <input type="text" class="drug-name-input" placeholder="제품 이름 (예: 게보린)" />
         <input type="number" class="drug-count-input" placeholder="개수" min="1" value="1" />
         <button class="btn-lookup" onclick="lookupDrug(${idx})">식약처 조회</button>
-        <button class="btn-remove" onclick="removeDrugRow(${idx})">✕</button>
+        <button class="btn-remove" onclick="removeDrugRow(${idx})">삭제</button>
         <div class="drug-efficacy" id="efficacy-${idx}"></div>
     `;
     document.getElementById('drugList').appendChild(row);
@@ -773,7 +1152,7 @@ function removeDrugRow(idx) {
 async function lookupDrug(idx) {
     const row = document.getElementById(`drugRow-${idx}`);
     const name = row.querySelector('.drug-name-input').value.trim();
-    if (!name) return alert('약 이름을 입력하세요.');
+    if (!name) return alert('제품 이름을 입력하세요.');
 
     const btn = row.querySelector('.btn-lookup');
     btn.textContent = '조회 중...';
@@ -865,17 +1244,17 @@ async function updatePacketBraille() {
 async function generatePacket() {
     const label = document.getElementById('packetLabel').value.trim();
     const purpose = document.getElementById('packetPurpose').value.trim();
-    if (!label) { alert('봉지 라벨을 입력하세요.'); return; }
+    if (!label) { alert('묶음 라벨을 입력하세요.'); return; }
     if (!purpose) { alert('전체 목적을 입력하세요.'); return; }
 
     const rows = document.querySelectorAll('.drug-row');
-    if (rows.length === 0) { alert('약을 하나 이상 추가하세요.'); return; }
+    if (rows.length === 0) { alert('제품을 하나 이상 추가하세요.'); return; }
 
     const drugs = [];
     for (const row of rows) {
         const name = row.querySelector('.drug-name-input').value.trim();
         const count = parseInt(row.querySelector('.drug-count-input').value) || 1;
-        if (!name) { alert('약 이름이 비어있는 항목이 있습니다.'); return; }
+        if (!name) { alert('제품 이름이 비어있는 항목이 있습니다.'); return; }
         drugs.push({
             name,
             count,
@@ -888,7 +1267,7 @@ async function generatePacket() {
     const timing = document.getElementById('packetTiming').value.trim() || null;
     const extra_caution = document.getElementById('packetCaution').value.trim() || null;
 
-    showStatus('packetStatus', 'loading', '봉지약 라벨 출력 중 + NFC 태그 쓰는 중...');
+    showStatus('packetStatus', 'loading', '묶음 라벨 출력 중 + NFC 태그 쓰는 중...');
     document.getElementById('packetGenerateBtn').disabled = true;
 
     try {
@@ -899,15 +1278,15 @@ async function generatePacket() {
         });
 
         const data = await res.json();
-        const printerIcon = data.printer_ok ? '✅' : '⚠️';
-        const nfcIcon = data.nfc_ok ? '✅' : '⚠️';
+        const printerLabel = data.printer_ok ? '점자 프린터 완료' : '점자 프린터 미연결';
+        const nfcLabel = data.nfc_ok ? 'NFC 태그 완료' : 'NFC 태그 미연결';
         const preview = (data.voice_preview || []).map(s => `<li>${s}</li>`).join('');
 
         const statusHtml = `
             출력 완료
             <div class="hw-status">
-                <span class="hw-badge ${data.printer_ok ? 'hw-ok' : 'hw-err'}">${printerIcon} 점자 프린터</span>
-                <span class="hw-badge ${data.nfc_ok ? 'hw-ok' : 'hw-err'}">${nfcIcon} NFC 태그</span>
+                <span class="hw-badge ${data.printer_ok ? 'hw-ok' : 'hw-err'}">${printerLabel}</span>
+                <span class="hw-badge ${data.nfc_ok ? 'hw-ok' : 'hw-err'}">${nfcLabel}</span>
             </div>
             <div class="nfc-url"><a href="${data.nfc_data}" target="_blank">${data.nfc_data}</a></div>
             ${preview ? `<ul style="margin-top:8px;font-size:13px;color:#2d3748;padding-left:18px">${preview}</ul>` : ''}

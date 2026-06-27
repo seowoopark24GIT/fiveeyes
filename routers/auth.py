@@ -51,6 +51,36 @@ def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
+@router.get("/register", response_class=HTMLResponse)
+def register_page(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
+
+
+@router.post("/auth/register")
+def register(
+    username: str = Form(...),
+    password: str = Form(...),
+    password_confirm: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    username = username.strip()
+    if len(password) < 6:
+        return RedirectResponse(url="/register?error=short", status_code=302)
+    if password != password_confirm:
+        return RedirectResponse(url="/register?error=mismatch", status_code=302)
+    if db.query(User).filter(User.username == username).first():
+        return RedirectResponse(url="/register?error=exists", status_code=302)
+
+    user = User(
+        username=username,
+        hashed_password=hash_password(password),
+        role="pharmacist",
+    )
+    db.add(user)
+    db.commit()
+    return RedirectResponse(url="/login?registered=1", status_code=302)
+
+
 @router.post("/auth/login")
 def login(
     request: Request,

@@ -8,34 +8,44 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --bg: #0f172a;
-    --surface: #1e293b;
-    --accent: #38bdf8;
-    --green: #4ade80;
-    --text: #f1f5f9;
-    --sub: #94a3b8;
-    --warn: #fbbf24;
+    --bg: #ffffff;
+    --surface: #fafafa;
+    --border: #e5e5e5;
+    --accent: #0d0d0d;
+    --green: #16a34a;
+    --text: #0d0d0d;
+    --sub: #6e6e80;
+    --warn: #d97706;
 }
 
 body {
-    background: var(--bg);
+    background: #f3f4f6;
     color: var(--text);
-    font-family: 'Pretendard', 'Segoe UI', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard', sans-serif;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+.app-shell {
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--bg);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 24px 20px 40px;
+    padding: 24px 16px 48px;
+    width: 100%;
 }
 
-/* 상단 약 이름 */
 .drug-title {
-    font-size: 36px;
-    font-weight: 800;
+    font-size: 32px;
+    font-weight: 600;
     text-align: center;
-    color: var(--accent);
+    color: var(--text);
     margin-top: 16px;
     line-height: 1.2;
+    letter-spacing: -0.02em;
 }
 .drug-sub {
     font-size: 14px;
@@ -55,15 +65,13 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 3px solid var(--accent);
+    border: 2px solid var(--border);
     cursor: pointer;
     transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
 }
 .voice-status.playing {
     border-color: var(--green);
-    box-shadow: 0 0 0 0 rgba(74,222,128,0.4);
+    box-shadow: 0 0 0 0 rgba(22,163,74,0.25);
     animation: pulse 1.5s infinite;
 }
 .voice-status:hover { transform: scale(1.05); }
@@ -89,16 +97,15 @@ body {
     max-width: 480px;
     min-height: 60px;
     background: var(--surface);
-    border-radius: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
     padding: 18px 20px;
     font-size: 20px;
     font-weight: 600;
-    color: var(--green);
+    color: var(--text);
     text-align: center;
     line-height: 1.5;
     margin-bottom: 24px;
-    border: 1px solid rgba(74,222,128,0.3);
-    transition: opacity 0.3s;
 }
 .now-speaking.empty { color: var(--sub); font-weight: 400; font-size: 15px; }
 
@@ -114,23 +121,23 @@ body {
 
 .script-item {
     background: var(--surface);
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 14px 18px;
     font-size: 15px;
     color: var(--text);
     line-height: 1.5;
-    border-left: 4px solid transparent;
+    border: 1px solid var(--border);
+    border-left: 3px solid transparent;
     transition: all 0.2s;
-    opacity: 0.6;
+    opacity: 0.55;
 }
 .script-item.active {
     opacity: 1;
     border-left-color: var(--green);
-    background: #1e3a2f;
+    background: #f0fdf4;
 }
 .script-item.done {
-    opacity: 0.4;
-    border-left-color: #334155;
+    opacity: 0.35;
 }
 
 /* 알약 이미지 */
@@ -138,8 +145,8 @@ body {
     width: 160px;
     height: 160px;
     object-fit: cover;
-    border-radius: 16px;
-    border: 2px solid var(--surface);
+    border-radius: 10px;
+    border: 1px solid var(--border);
     margin-bottom: 20px;
     display: block;
 }
@@ -155,16 +162,16 @@ body {
     flex: 1;
     padding: 16px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.15s;
 }
-.ctrl-replay { background: var(--accent); color: #0f172a; }
-.ctrl-replay:hover { filter: brightness(1.1); }
-.ctrl-pause  { background: var(--surface); color: var(--text); border: 1px solid #334155; }
-.ctrl-pause:hover { background: #334155; }
+.ctrl-replay { background: var(--accent); color: #fff; }
+.ctrl-replay:hover { background: #333; }
+.ctrl-pause  { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+.ctrl-pause:hover { background: var(--surface); }
 
 /* 로딩 스피너 */
 .loading-overlay {
@@ -197,6 +204,8 @@ body {
 </head>
 <body>
 
+<div class="app-shell">
+
 <!-- 스크린리더 안내 -->
 <div class="sr-only" aria-live="polite" id="ariaLive"></div>
 
@@ -217,7 +226,7 @@ body {
     aria-label="음성 안내 재생"
     tabindex="0"
 >
-    <div class="voice-icon" id="voiceIcon">🔊</div>
+    <div class="voice-icon" id="voiceIcon">재생</div>
     <div class="voice-label" id="voiceLabel">탭하여 듣기</div>
 </div>
 
@@ -250,6 +259,8 @@ body {
 
 {% endif %}
 
+</div>
+
 <script>
 const SCRIPT = {{ voice_script_json | safe }};
 let idx = 0;
@@ -257,7 +268,7 @@ let isPlaying = false;
 let isPaused = false;
 
 function setIcon(playing) {
-    document.getElementById('voiceIcon').textContent  = playing ? '🔊' : '🔇';
+    document.getElementById('voiceIcon').textContent  = playing ? '재생' : '정지';
     document.getElementById('voiceLabel').textContent = playing ? '재생 중' : '탭하여 듣기';
     document.getElementById('voiceStatus').classList.toggle('playing', playing);
     document.getElementById('pauseBtn').textContent   = playing ? '일시정지' : '재개';

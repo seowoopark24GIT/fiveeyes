@@ -15,6 +15,9 @@ class PharmacistGenerateRequest(BaseModel):
     drug_data: dict | None = None    # 검색 결과 전체 캐시 (medicine 페이지 API 재호출 방지)
 
 
+class IdentifyRequest(BaseModel):
+    image_base64: str
+
 # ── 봉지약용 ──────────────────────────────────────────────────────────────
 
 class PacketDrug(BaseModel):

@@ -3,92 +3,152 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>시각장애인 복약 AI 접근성 시스템</title>
+<title>소리잇다</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    font-family: 'Pretendard', 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #4e73df, #1cc88a);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    color: #333;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard', sans-serif;
+    background: #f3f4f6;
+    color: #0d0d0d;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
 }
 
-.container {
-    background: rgba(255,255,255,0.96);
-    padding: 56px 48px;
-    border-radius: 24px;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+.app-shell {
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    border-bottom: 1px solid #e5e5e5;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+.topbar-links {
+    display: flex;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.topbar-links a {
+    color: #6e6e80;
+    text-decoration: none;
+}
+.topbar-links a:hover { color: #0d0d0d; }
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
     text-align: center;
-    width: 400px;
-    backdrop-filter: blur(10px);
 }
 
 h1 {
-    font-size: 22px;
-    font-weight: 800;
-    margin-bottom: 6px;
-    color: #2d3748;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
 }
 
 .subtitle {
-    font-size: 13px;
-    color: #718096;
-    margin-bottom: 40px;
+    font-size: 15px;
+    color: #6e6e80;
     line-height: 1.6;
+    margin-bottom: 40px;
+}
+
+.actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .btn {
     display: block;
     width: 100%;
-    padding: 18px;
-    margin-bottom: 16px;
+    padding: 14px;
+    background: #0d0d0d;
+    color: #fff;
     border: none;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: 700;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.25s ease;
     text-decoration: none;
-    color: white;
+    text-align: center;
+    transition: background 0.15s;
 }
+.btn:hover { background: #333; }
 
-.btn-pharmacist {
-    background: linear-gradient(45deg, #4e73df, #2e59d9);
+.btn-outline {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: #fff;
+    color: #0d0d0d;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.15s;
 }
-.btn-pharmacist:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 24px rgba(78,115,223,0.35);
-}
+.btn-outline:hover { background: #fafafa; }
 
 .footer {
-    margin-top: 28px;
-    font-size: 12px;
-    color: #a0aec0;
+    margin-top: 48px;
+    font-size: 13px;
+    color: #8e8ea0;
     line-height: 1.8;
 }
 </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>복약 AI 접근성 시스템</h1>
-    <div class="subtitle">
-        시각장애인을 위한 점자라벨 · NFC · AI 음성 안내
+<div class="app-shell">
+    <div class="topbar">
+        <div class="logo">소리잇다</div>
+        <div class="topbar-links">
+            <a href="/login">로그인</a>
+            <a href="/register">회원가입</a>
+        </div>
     </div>
 
-    <a href="/login" class="btn btn-pharmacist">
-        약사 로그인
-    </a>
+    <main>
+        <h1>복약 AI 접근성</h1>
+        <p class="subtitle">
+            점자라벨 · NFC · AI 음성 안내
+        </p>
 
-    <div class="footer">
-        약국에서 약사가 약 이름을 입력하면<br>
-        점자 라벨과 NFC 태그가 자동 생성됩니다.<br><br>
-        © 2026 복약 AI 접근성 프로젝트
-    </div>
+        <div class="actions">
+            <a href="/login" class="btn">로그인</a>
+            <a href="/register" class="btn-outline">회원가입</a>
+        </div>
+
+        <div class="footer">
+            제품을 촬영하면<br>
+            점자 라벨과 NFC 태그가 생성됩니다.
+        </div>
+    </main>
 </div>
 
 </body>

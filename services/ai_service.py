@@ -1,8 +1,16 @@
 import json
+import re
 from openai import AsyncOpenAI
 from config import OPENAI_API_KEY
 
 _client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+
+_IDENTIFY_SYSTEM = (
+    "당신은 시각장애인을 위한 제품 식별 도우미입니다. "
+    "사진 속 포장·라벨·알약·튜브 등을 보고 의약품(medicine)인지 화장품(cosmetic)인지 분류합니다. "
+    "제품명을 한글로 최대한 정확히 추정하고, 촉각·형태 중심으로 짧게 설명합니다. "
+    "의료 진단·처방은 하지 마세요. JSON만 출력하세요."
+)
 
 _SYSTEM_PROMPT = (
     "당신은 시각장애인을 위한 의약품 안내 도우미입니다. "
@@ -12,6 +20,118 @@ _SYSTEM_PROMPT = (
     "'도움됩니다', '좋습니다' 같은 광고성 표현은 절대 금지. "
     "약의 실제 적응증을 정확하게 표현하세요 (예: 혈전 억제제입니다, 해열진통제입니다)."
 )
+
+
+async def identify_from_image(image_base64: str) -> dict:
+    """GPT Vision으로 약품/화장품 분류 및 이름·형태 추정"""
+    image_url = image_base64
+    if image_base64 and not image_base64.startswith("data:"):
+        image_url = f"data:image/jpeg;base64,{image_base64}"
+
+    response = await _client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": _IDENTIFY_SYSTEM},
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": (
+                            "사진 속 제품을 분석해 JSON으로 답하세요.\n"
+                            '{ "product_type": "medicine"|"cosmetic"|"unknown", '
+                            '"name_guess": "추정 제품명", '
+                            '"short_label": "점자·음성용 10자 이내 짧은 이름", '
+                            '"visual_description": "촉각·형태 중심 25자 이내 설명", '
+                            '"confidence": "high"|"medium"|"low" }'
+                        ),
+                    },
+                    {"type": "image_url", "image_url": {"url": image_url}},
+                ],
+            },
+        ],
+        response_format={"type": "json_object"},
+        max_tokens=300,
+    )
+
+    result = json.loads(response.choices[0].message.content)
+    product_type = result.get("product_type", "unknown")
+    if product_type not in {"medicine", "cosmetic", "unknown"}:
+        product_type = "unknown"
+    return {
+        "product_type": product_type,
+        "name_guess": (result.get("name_guess") or "").strip(),
+        "short_label": (result.get("short_label") or result.get("name_guess") or "").strip(),
+        "visual_description": (result.get("visual_description") or "").strip(),
+        "confidence": result.get("confidence", "medium"),
+    }
+
+
+def build_identification_voice(
+    product_type: str,
+    item_name: str,
+    summary_lines: list[str],
+    verified: bool,
+) -> list[str]:
+    """촬영 후 확인용 음성 스크립트 (TTS 재생 순서)"""
+    kind = "의약품" if product_type == "medicine" else "화장품"
+    sentences = [f"촬영하신 것은 {item_name} {kind}으로 확인됩니다."]
+    sentences.extend(line for line in summary_lines if line)
+
+    if not verified:
+        sentences.append("공식 데이터베이스에서 일치하는 정보를 찾지 못했습니다.")
+
+    sentences.append(
+        "맞으면 '맞아'라고, 틀리면 '다시'라고 말씀해 주세요. "
+        "또는 화면의 버튼을 눌러 주세요."
+    )
+    return sentences
+
+
+def _trim_sentence(text: str, max_len: int = 25) -> str:
+    if not text:
+        return ""
+    clean = re.sub(r"<[^>]+>", " ", text).replace("\n", " ").strip()
+    clean = re.sub(r"\s+", " ", clean)
+    if len(clean) <= max_len:
+        return clean
+    dot = clean.find(".")
+    if 0 < dot < max_len:
+        return clean[: dot + 1]
+    return clean[:max_len]
+
+
+async def analyze_cosmetic(cosmetic_info: dict, short_name: str | None = None) -> list[str]:
+    """화장품 공식 데이터 기반 음성 안내 스크립트"""
+    display_name = short_name or cosmetic_info.get("itemName", "")
+    prompt_text = f"""다음 화장품 정보를 바탕으로 시각장애인 음성 안내 문장을 JSON으로 만들어주세요.
+
+제품명: {cosmetic_info.get('itemName', '')}
+제조사: {cosmetic_info.get('manufacturer', '')}
+주의사항: {cosmetic_info.get('atpnWarnQesitm', '')}
+
+아래 항목을 JSON 배열 voice_script로 작성:
+A (필수): 제품 용도 — 20자 이내
+B (필수): 가장 중요한 주의사항 — 20자 이내
+C (선택): 사용 팁 — 20자 이내
+
+규칙: 각 문장 최대 25자. JSON만 출력."""
+
+    response = await _client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "system",
+                "content": "시각장애인을 위한 화장품 안내 도우미입니다. 짧고 쉬운 문장만 사용하세요.",
+            },
+            {"role": "user", "content": prompt_text},
+        ],
+        response_format={"type": "json_object"},
+        max_tokens=300,
+    )
+    result = json.loads(response.choices[0].message.content)
+    cleaned = [_trim_sentence(s) for s in result.get("voice_script", []) if s]
+    return [f"이 제품은 {display_name}입니다"] + cleaned
 
 
 async def analyze_drug(drug_info: dict, image_url: str | None = None, short_name: str | None = None) -> list[str]:
@@ -83,11 +203,11 @@ def build_packet_voice_script(
     drugs: list[dict],
     extra_caution: str | None,
 ) -> list[str]:
-    """봉지약 음성 스크립트를 Python에서 직접 생성 (AI 없음)"""
-    sentences = [f"이 봉지는 {label}입니다"]
+    """묶음 제품 음성 스크립트를 Python에서 직접 생성 (AI 없음)"""
+    sentences = [f"이 묶음은 {label}입니다"]
 
     if timing:
-        sentences.append(f"{timing}에 복용하는 봉지약입니다")
+        sentences.append(f"{timing}에 복용하는 묶음 제품입니다")
 
     sentences.append(purpose)
 

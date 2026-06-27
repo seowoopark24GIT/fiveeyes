@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인 — 소리잇다</title>
+    <title>회원가입 — 소리잇다</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -35,7 +35,6 @@
         .logo {
             font-size: 18px;
             font-weight: 700;
-            letter-spacing: -0.03em;
             color: #0d0d0d;
             text-decoration: none;
         }
@@ -45,17 +44,12 @@
             text-decoration: none;
             font-size: 14px;
         }
-        .topbar a.link:hover { color: #0d0d0d; }
 
-        main {
-            flex: 1;
-            padding: 32px 16px 48px;
-        }
+        main { flex: 1; padding: 32px 16px 48px; }
 
         h2 {
             font-size: 22px;
             font-weight: 600;
-            letter-spacing: -0.02em;
             margin-bottom: 8px;
         }
 
@@ -82,7 +76,6 @@
             border-radius: 10px;
             font-size: 15px;
             outline: none;
-            background: #fff;
         }
         input:focus { border-color: #0d0d0d; }
 
@@ -98,10 +91,8 @@
             color: white;
             margin-top: 8px;
         }
-        button[type="submit"]:hover { background: #333; }
 
         .error { color: #c53030; font-size: 13px; margin-top: 16px; }
-        .success { color: #276749; font-size: 13px; margin-top: 16px; }
 
         .footer-link {
             margin-top: 24px;
@@ -109,11 +100,7 @@
             color: #6e6e80;
             text-align: center;
         }
-        .footer-link a {
-            color: #0d0d0d;
-            text-decoration: none;
-            font-weight: 500;
-        }
+        .footer-link a { color: #0d0d0d; text-decoration: none; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -121,33 +108,41 @@
 <div class="app-shell">
     <div class="topbar">
         <a href="/" class="logo">소리잇다</a>
-        <a href="/register" class="link">회원가입</a>
+        <a href="/login" class="link">로그인</a>
     </div>
 
     <main>
-        <h2>로그인</h2>
-        <p class="desc">계정 정보를 입력해 주세요.</p>
+        <h2>회원가입</h2>
+        <p class="desc">새 계정을 만드세요.</p>
 
-        <form method="post" action="/auth/login">
+        <form method="post" action="/auth/register">
             <div class="field">
                 <label for="username">아이디</label>
-                <input id="username" type="text" name="username" required autocomplete="username">
+                <input id="username" type="text" name="username" required autocomplete="username" minlength="2">
             </div>
             <div class="field">
                 <label for="password">비밀번호</label>
-                <input id="password" type="password" name="password" required autocomplete="current-password">
+                <input id="password" type="password" name="password" required autocomplete="new-password" minlength="6">
             </div>
-            <button type="submit">로그인</button>
+            <div class="field">
+                <label for="password_confirm">비밀번호 확인</label>
+                <input id="password_confirm" type="password" name="password_confirm" required autocomplete="new-password" minlength="6">
+            </div>
+            <button type="submit">가입하기</button>
         </form>
 
-        {% if request.query_params.get('error') %}
-            <p class="error">아이디 또는 비밀번호가 잘못되었습니다.</p>
-        {% endif %}
-        {% if request.query_params.get('registered') %}
-            <p class="success">가입이 완료되었습니다. 로그인해 주세요.</p>
+        {% set err = request.query_params.get('error') %}
+        {% if err == 'exists' %}
+            <p class="error">이미 사용 중인 아이디입니다.</p>
+        {% elif err == 'mismatch' %}
+            <p class="error">비밀번호가 일치하지 않습니다.</p>
+        {% elif err == 'short' %}
+            <p class="error">비밀번호는 6자 이상이어야 합니다.</p>
+        {% elif err %}
+            <p class="error">가입에 실패했습니다. 다시 시도해 주세요.</p>
         {% endif %}
 
-        <p class="footer-link">계정이 없으신가요? <a href="/register">회원가입</a></p>
+        <p class="footer-link">이미 계정이 있으신가요? <a href="/login">로그인</a></p>
     </main>
 </div>
 
