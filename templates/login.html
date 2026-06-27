@@ -4,151 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로그인 — 소리잇다</title>
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard', sans-serif;
-            background: #f3f4f6;
-            color: #0d0d0d;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .app-shell {
-            max-width: 480px;
-            min-height: 100vh;
-            margin: 0 auto;
-            background: #ffffff;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .topbar {
-            border-bottom: 1px solid #e5e5e5;
-            padding: 14px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            color: #0d0d0d;
-            text-decoration: none;
-        }
-
-        .topbar a.link {
-            color: #6e6e80;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .topbar a.link:hover { color: #0d0d0d; }
-
-        main {
-            flex: 1;
-            padding: 32px 16px 48px;
-        }
-
-        h2 {
-            font-size: 22px;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            margin-bottom: 8px;
-        }
-
-        .desc {
-            font-size: 14px;
-            color: #6e6e80;
-            margin-bottom: 28px;
-        }
-
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: #6e6e80;
-            margin-bottom: 6px;
-        }
-
-        .field { margin-bottom: 16px; }
-
-        input {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid #e5e5e5;
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-            background: #fff;
-        }
-        input:focus { border-color: #0d0d0d; }
-
-        button[type="submit"] {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            background: #0d0d0d;
-            color: white;
-            margin-top: 8px;
-        }
-        button[type="submit"]:hover { background: #333; }
-
-        .error { color: #c53030; font-size: 13px; margin-top: 16px; }
-        .success { color: #276749; font-size: 13px; margin-top: 16px; }
-
-        .footer-link {
-            margin-top: 24px;
-            font-size: 14px;
-            color: #6e6e80;
-            text-align: center;
-        }
-        .footer-link a {
-            color: #0d0d0d;
-            text-decoration: none;
-            font-weight: 500;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/css/theme.css">
 </head>
 <body>
 
 <div class="app-shell">
-    <div class="topbar">
+    <header class="app-header">
         <a href="/" class="logo">소리잇다</a>
-        <a href="/register" class="link">회원가입</a>
-    </div>
+        <a href="/register" class="header-link">회원가입</a>
+    </header>
 
-    <main>
-        <h2>로그인</h2>
-        <p class="desc">계정 정보를 입력해 주세요.</p>
+    <main class="app-main">
+        <div class="page-section">
+            <h2>로그인</h2>
+            <p class="desc">계정 정보를 입력해 주세요.</p>
 
-        <form method="post" action="/auth/login">
-            <div class="field">
-                <label for="username">아이디</label>
-                <input id="username" type="text" name="username" required autocomplete="username">
-            </div>
-            <div class="field">
-                <label for="password">비밀번호</label>
-                <input id="password" type="password" name="password" required autocomplete="current-password">
-            </div>
-            <button type="submit">로그인</button>
-        </form>
+            <form id="loginForm" method="post" action="/auth/login">
+                <div class="field">
+                    <label for="username">아이디</label>
+                    <input id="username" type="text" name="username" required autocomplete="username">
+                </div>
+                <div class="field">
+                    <label for="password">비밀번호</label>
+                    <input id="password" type="password" name="password" required autocomplete="current-password">
+                </div>
+            </form>
 
-        {% if request.query_params.get('error') %}
-            <p class="error">아이디 또는 비밀번호가 잘못되었습니다.</p>
-        {% endif %}
-        {% if request.query_params.get('registered') %}
-            <p class="success">가입이 완료되었습니다. 로그인해 주세요.</p>
-        {% endif %}
+            {% if request.query_params.get('error') %}
+                <p class="error-text">아이디 또는 비밀번호가 잘못되었습니다.</p>
+            {% endif %}
+            {% if request.query_params.get('registered') %}
+                <p class="success-text">가입이 완료되었습니다. 로그인해 주세요.</p>
+            {% endif %}
 
-        <p class="footer-link">계정이 없으신가요? <a href="/register">회원가입</a></p>
+            <p class="footer-link">계정이 없으신가요? <a href="/register">회원가입</a></p>
+        </div>
     </main>
+
+    <footer class="bottom-dock">
+        <div class="cta-zone">
+            <div class="cta-row">
+                <button type="submit" form="loginForm" class="btn btn-accent">로그인</button>
+            </div>
+        </div>
+    </footer>
 </div>
 
 </body>

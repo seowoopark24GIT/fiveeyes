@@ -4,151 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소리잇다</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard', sans-serif;
-    background: #f3f4f6;
-    color: #0d0d0d;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-}
-
-.app-shell {
-    max-width: 480px;
-    min-height: 100vh;
-    margin: 0 auto;
-    background: #ffffff;
-    display: flex;
-    flex-direction: column;
-}
-
-.topbar {
-    border-bottom: 1px solid #e5e5e5;
-    padding: 14px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-}
-
-.topbar-links {
-    display: flex;
-    gap: 12px;
-    font-size: 14px;
-}
-
-.topbar-links a {
-    color: #6e6e80;
-    text-decoration: none;
-}
-.topbar-links a:hover { color: #0d0d0d; }
-
-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 48px 24px;
-    text-align: center;
-}
-
-h1 {
-    font-size: 26px;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    margin-bottom: 12px;
-}
-
-.subtitle {
-    font-size: 15px;
-    color: #6e6e80;
-    line-height: 1.6;
-    margin-bottom: 40px;
-}
-
-.actions {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.btn {
-    display: block;
-    width: 100%;
-    padding: 14px;
-    background: #0d0d0d;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-    transition: background 0.15s;
-}
-.btn:hover { background: #333; }
-
-.btn-outline {
-    display: block;
-    width: 100%;
-    padding: 14px;
-    background: #fff;
-    color: #0d0d0d;
-    border: 1px solid #e5e5e5;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 500;
-    text-decoration: none;
-    text-align: center;
-    transition: background 0.15s;
-}
-.btn-outline:hover { background: #fafafa; }
-
-.footer {
-    margin-top: 48px;
-    font-size: 13px;
-    color: #8e8ea0;
-    line-height: 1.8;
-}
-</style>
+<link rel="stylesheet" href="/static/css/theme.css">
 </head>
 <body>
 
 <div class="app-shell">
-    <div class="topbar">
+    <header class="app-header">
         <div class="logo">소리잇다</div>
         <div class="topbar-links">
             <a href="/login">로그인</a>
             <a href="/register">회원가입</a>
         </div>
-    </div>
+    </header>
 
-    <main>
+    <main class="hero-main">
         <h1>복약 AI 접근성</h1>
         <p class="subtitle">
             점자라벨 · NFC · AI 음성 안내
         </p>
-
-        <div class="actions">
-            <a href="/login" class="btn">로그인</a>
-            <a href="/register" class="btn-outline">회원가입</a>
-        </div>
-
-        <div class="footer">
+        <p class="footer-note">
             제품을 촬영하면<br>
             점자 라벨과 NFC 태그가 생성됩니다.
-        </div>
+        </p>
     </main>
+
+    <footer class="bottom-dock">
+        <div class="cta-zone">
+            <div class="cta-row">
+                <a href="/login" class="btn btn-accent btn-link">로그인</a>
+            </div>
+            <div class="cta-row">
+                <a href="/register" class="btn btn-secondary btn-link">회원가입</a>
+            </div>
+        </div>
+    </footer>
 </div>
 
 </body>

@@ -4,150 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소리잇다</title>
+<link rel="stylesheet" href="/static/css/theme.css">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-    --bg: #ffffff;
-    --page-bg: #f3f4f6;
-    --surface: #fafafa;
-    --border: #e5e5e5;
-    --text: #0d0d0d;
-    --text-secondary: #6e6e80;
-    --text-muted: #8e8ea0;
-    --accent: #0d0d0d;
-    --accent-hover: #333;
-    --shell-width: 480px;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard', sans-serif;
-    background: var(--page-bg);
-    min-height: 100vh;
-    color: var(--text);
-    -webkit-font-smoothing: antialiased;
-}
-
-.app-shell {
-    max-width: var(--shell-width);
-    min-height: 100vh;
-    margin: 0 auto;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-}
-
-/* ── 상단 헤더 ── */
-header {
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.logo {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    color: var(--text);
-    text-decoration: none;
-}
-
-.logout-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    padding: 6px 0;
-    font-size: 14px;
-    text-decoration: none;
-    cursor: pointer;
-}
-.logout-btn:hover { color: var(--text); }
-
-/* ── 레이아웃 ── */
-main {
-    flex: 1;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.section {
-    width: 100%;
-    padding: 20px 16px 24px;
-}
-
-.section.main-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 16px;
-}
-
-#result-section {
-    display: none;
-    border-top: 1px solid var(--border);
-}
-
-.section h2 {
-    font-size: 17px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--text);
-    letter-spacing: -0.02em;
-}
-
-.card-desc {
-    font-size: 14px;
-    color: var(--text-secondary);
-    margin-bottom: 16px;
-    line-height: 1.6;
-}
-
-/* ── 입력 / 버튼 ── */
-.search-row { display: flex; gap: 8px; }
-
-.search-input {
-    flex: 1;
-    padding: 10px 14px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 15px;
-    outline: none;
-    background: var(--bg);
-    transition: border-color 0.15s;
-}
-.search-input:focus { border-color: var(--text); }
-
-.btn {
-    padding: 10px 18px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s;
-    white-space: nowrap;
-}
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
-.btn-success {
-    background: var(--accent);
-    color: #fff;
-    width: 100%;
-    font-size: 15px;
-    padding: 14px;
-    margin-top: 8px;
-}
-.btn-success:hover:not(:disabled) { background: var(--accent-hover); }
-
-/* ── 검색 결과 ── */
+.page-section { padding: 20px; }
+.page-section + .page-section { border-top: 1px solid var(--border); }
+#result-section { display: none; }
+.required { color: var(--danger); }
 
 .drug-header {
     display: flex;
@@ -188,12 +50,13 @@ main {
 }
 .drug-shape {
     font-size: 12px;
-    color: var(--text-secondary);
-    background: var(--surface);
-    border: 1px solid var(--border);
+    color: var(--accent-text);
+    background: var(--accent);
+    border: none;
     padding: 3px 10px;
     border-radius: 20px;
     display: inline-block;
+    font-weight: 600;
 }
 
 .info-grid {
@@ -257,24 +120,24 @@ main {
     font-size: 14px;
     font-family: inherit;
     outline: none;
-    background: var(--bg);
+    background: var(--surface);
 }
 .manual-panel input:focus,
 .manual-panel textarea:focus { border-color: var(--text); }
 .manual-panel textarea { resize: vertical; min-height: 60px; }
 .btn-manual-confirm {
     width: 100%;
-    padding: 10px;
-    background: var(--accent);
+    padding: 12px;
+    background: var(--primary);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius);
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     margin-top: 4px;
 }
-.btn-manual-confirm:hover { background: var(--accent-hover); }
+.btn-manual-confirm:hover { background: var(--primary-hover); }
 
 .braille-preview {
     background: var(--surface);
@@ -305,12 +168,11 @@ main {
     margin-top: 12px;
     border: 1px solid var(--border);
 }
-.status-bar.loading { background: var(--surface); color: var(--text-secondary); }
-.status-bar.success { background: var(--surface); color: var(--text); border-color: #c8e6c9; }
-.status-bar.error   { background: #fff5f5; color: #c53030; border-color: #fed7d7; }
+.status-bar.success { background: var(--gray-020); color: var(--success); border-color: rgba(74, 222, 128, 0.35); }
+.status-bar.error   { background: #2a1518; color: var(--danger); border-color: rgba(248, 113, 113, 0.35); }
 
 .nfc-url { font-size: 13px; color: var(--text-secondary); word-break: break-all; margin-top: 6px; }
-.nfc-url a { color: var(--text); }
+.nfc-url a { color: var(--accent); }
 
 .hw-status { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .hw-badge {
@@ -320,37 +182,8 @@ main {
     font-weight: 500;
     border: 1px solid var(--border);
 }
-.hw-ok  { background: var(--surface); color: var(--text); }
-.hw-err { background: #fff5f5; color: #c53030; border-color: #fed7d7; }
-
-/* ── 탭 ── */
-.mode-tabs {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 4px;
-}
-.mode-tab {
-    flex: 1;
-    padding: 8px 12px;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.15s;
-}
-.mode-tab.active {
-    background: var(--bg);
-    color: var(--text);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-.mode-tab:hover:not(.active) { color: var(--text); }
+.hw-ok  { background: var(--surface); color: var(--success); }
+.hw-err { background: #2a1518; color: var(--danger); border-color: rgba(248, 113, 113, 0.35); }
 
 /* ── 봉지약 ── */
 .packet-form { display: flex; flex-direction: column; gap: 16px; }
@@ -372,11 +205,12 @@ main {
     border-radius: 8px;
     font-size: 15px;
     outline: none;
-    background: var(--bg);
+    background: var(--surface);
+    color: var(--text);
     font-family: inherit;
     transition: border-color 0.15s;
 }
-.field-input:focus { border-color: var(--text); }
+.field-input:focus { border-color: var(--primary); box-shadow: var(--focus-ring); }
 textarea.field-input { resize: vertical; min-height: 70px; }
 
 .drug-list { display: flex; flex-direction: column; gap: 8px; }
@@ -401,7 +235,7 @@ textarea.field-input { resize: vertical; min-height: 70px; }
     background: var(--bg);
     font-family: inherit;
 }
-.drug-row input:focus { border-color: var(--text); }
+.drug-row input:focus { border-color: var(--primary); }
 
 .btn-lookup {
     padding: 8px 12px;
@@ -451,7 +285,7 @@ textarea.field-input { resize: vertical; min-height: 70px; }
     width: 100%;
     transition: all 0.15s;
 }
-.btn-add-drug:hover { border-color: var(--text); color: var(--text); background: var(--surface); }
+.btn-add-drug:hover { border-color: var(--primary); color: var(--primary); background: rgba(31, 87, 231, 0.12); }
 
 /* ── 카메라 ── */
 .camera-wrap {
@@ -461,88 +295,49 @@ textarea.field-input { resize: vertical; min-height: 70px; }
     flex: 1;
 }
 .camera-preview {
-    width: calc(100% + 32px);
-    margin: 0 -16px;
+    width: calc(100% + 40px);
+    margin: 0 -20px;
     flex: 1;
-    min-height: 360px;
-    max-height: 58vh;
+    min-height: 320px;
+    max-height: 52vh;
     aspect-ratio: 3 / 4;
     border-radius: 0;
-    background: #111;
+    background: #000;
     object-fit: cover;
     border: none;
 }
-.camera-actions { display: flex; gap: 8px; }
-.btn-camera {
-    flex: 1;
-    padding: 14px;
-    font-size: 15px;
-    font-weight: 500;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: background 0.15s;
-}
-.btn-capture { background: var(--accent); color: #fff; }
-.btn-capture:hover { background: var(--accent-hover); }
-.btn-retake {
-    background: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-}
-.btn-retake:hover { background: var(--surface); }
 
 .confirm-panel {
     display: none;
     flex-direction: column;
     gap: 12px;
     padding: 16px;
-    border-radius: 8px;
+    border-radius: var(--radius);
     background: var(--surface);
     border: 1px solid var(--border);
+    margin-top: 12px;
 }
 .confirm-panel.visible { display: flex; }
 .confirm-panel p { font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
-.confirm-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.btn-confirm-yes,
-.btn-confirm-no {
-    min-height: 64px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
-}
-.btn-confirm-yes { background: var(--accent); color: #fff; border-color: var(--accent); }
-.btn-confirm-yes:hover { background: var(--accent-hover); }
-.btn-confirm-no  { background: var(--bg); color: var(--text); }
-.btn-confirm-no:hover  { background: var(--surface); }
 
 .voice-live {
     min-height: 20px;
     font-size: 13px;
-    color: var(--text-secondary);
-    font-weight: 500;
+    color: var(--accent);
+    font-weight: 600;
 }
 </style>
 </head>
 <body>
 
 <div class="app-shell">
-<header>
+<header class="app-header">
     <a href="/" class="logo">소리잇다</a>
     <a href="/logout" class="logout-btn">로그아웃</a>
 </header>
 
-<main>
-    <div class="section main-section">
-        <div class="mode-tabs">
-            <button class="mode-tab active" id="tabCamera" onclick="switchMode('camera')">촬영</button>
-            <button class="mode-tab" id="tabSingle" onclick="switchMode('single')">이름 검색</button>
-            <button class="mode-tab" id="tabPacket" onclick="switchMode('packet')">묶음 제품</button>
-        </div>
-
+<main class="app-main">
+    <div class="page-section">
         <!-- 카메라 + 음성 확인 -->
         <div id="camera-mode">
             <h2>제품 촬영 · 음성 확인</h2>
@@ -551,54 +346,37 @@ textarea.field-input { resize: vertical; min-height: 70px; }
             </p>
             <div class="camera-wrap">
                 <video id="cameraVideo" class="camera-preview" autoplay playsinline muted aria-label="웹캠 미리보기"></video>
-                <canvas id="cameraCanvas" style="display:none"></canvas>
-                <div class="camera-actions">
-                    <button class="btn-camera btn-capture" id="captureBtn" onclick="captureAndIdentify()" aria-label="촬영하고 식별하기">
-                        촬영
-                    </button>
-                    <button class="btn-camera btn-retake" id="retakeBtn" onclick="resetCameraFlow()" aria-label="다시 촬영">
-                        다시 찍기
-                    </button>
-                </div>
+                <canvas id="cameraCanvas" style="display:none" aria-hidden="true"></canvas>
                 <div id="cameraStatus" class="status-bar"></div>
                 <div id="voiceLive" class="voice-live" aria-live="polite"></div>
                 <div id="confirmPanel" class="confirm-panel" role="region" aria-label="제품 확인">
                     <p id="confirmSummary">—</p>
-                    <div class="confirm-buttons">
-                        <button class="btn-confirm-yes" id="confirmYesBtn" onclick="confirmIdentification(true)" aria-label="맞음, 출력하기">
-                            맞음
-                        </button>
-                        <button class="btn-confirm-no" id="confirmNoBtn" onclick="confirmIdentification(false)" aria-label="틀림, 다시 찍기">
-                            다시
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 단일약 폼 -->
+        <!-- 이름 검색 -->
         <div id="single-mode" style="display:none">
             <h2>제품 이름 검색</h2>
-            <div class="search-row">
-                <input
-                    id="searchInput"
-                    class="search-input"
-                    type="text"
-                    placeholder="예: 타이레놀, 게보린, 아스피린"
-                    autocomplete="off"
-                />
-                <button class="btn btn-primary" onclick="searchDrug()">검색</button>
-            </div>
+            <p class="card-desc">제품 이름을 입력한 뒤 하단 검색 버튼을 눌러 주세요.</p>
+            <input
+                id="searchInput"
+                class="search-input"
+                type="text"
+                placeholder="예: 타이레놀, 게보린, 아스피린"
+                autocomplete="off"
+                aria-label="제품 이름"
+            />
             <div id="searchStatus" class="status-bar"></div>
             <div id="manualPanel"></div>
         </div>
 
-        <!-- 봉지약 폼 -->
+        <!-- 묶음 제품 -->
         <div id="packet-mode" style="display:none">
             <h2>묶음 제품 입력</h2>
             <div class="packet-form">
                 <div class="field-group">
-                    <label>묶음 라벨 <span style="color:#c53030">*</span> (점자 출력용, 짧게)</label>
+                    <label>묶음 라벨 <span class="required">*</span> (점자 출력용, 짧게)</label>
                     <input id="packetLabel" class="field-input" type="text" placeholder="예: 감기약, 혈압약" oninput="updatePacketBraille()" />
                 </div>
                 <div class="field-group">
@@ -606,13 +384,13 @@ textarea.field-input { resize: vertical; min-height: 70px; }
                     <input id="packetTiming" class="field-input" type="text" placeholder="예: 아침 식후, 점심 식후, 취침 전" />
                 </div>
                 <div class="field-group">
-                    <label>전체 목적 <span style="color:#c53030">*</span></label>
+                    <label>전체 목적 <span class="required">*</span></label>
                     <textarea id="packetPurpose" class="field-input" placeholder="예: 감기 증상 완화를 위한 약이 들어있습니다"></textarea>
                 </div>
                 <div class="field-group">
-                    <label>제품 목록 <span style="color:#c53030">*</span></label>
+                    <label>제품 목록 <span class="required">*</span></label>
                     <div class="drug-list" id="drugList"></div>
-                    <button class="btn-add-drug" onclick="addDrugRow()">+ 제품 추가</button>
+                    <button type="button" class="btn-add-drug" onclick="addDrugRow()">+ 제품 추가</button>
                 </div>
                 <div class="field-group">
                     <label>추가 주의사항 (선택)</label>
@@ -621,16 +399,12 @@ textarea.field-input { resize: vertical; min-height: 70px; }
 
                 <div class="braille-label">점자 미리보기</div>
                 <div class="braille-preview" id="packetBraillePreview">라벨을 입력하세요</div>
-
-                <button class="btn btn-success" id="packetGenerateBtn" onclick="generatePacket()">
-                    묶음 라벨 출력 + NFC 태그 쓰기
-                </button>
                 <div id="packetStatus" class="status-bar"></div>
             </div>
         </div>
     </div>
 
-    <div class="section" id="result-section">
+    <div class="page-section" id="result-section">
         <h2>제품 정보</h2>
 
         <div class="drug-header">
@@ -662,14 +436,36 @@ textarea.field-input { resize: vertical; min-height: 70px; }
 
         <div class="braille-label">점자 미리보기</div>
         <div class="braille-preview" id="braillePreview">—</div>
-
-        <button class="btn btn-success" id="generateBtn" onclick="generateOutput()" disabled>
-            점자 라벨 출력 + NFC 태그 쓰기
-        </button>
-
         <div id="generateStatus" class="status-bar"></div>
     </div>
 </main>
+
+<footer class="bottom-dock" role="contentinfo">
+    <div class="cta-zone">
+        <div id="ctaCamera" class="cta-row">
+            <button class="btn btn-accent" id="captureBtn" onclick="captureAndIdentify()" aria-label="촬영하고 식별하기">촬영</button>
+            <button class="btn btn-negative" id="retakeBtn" onclick="resetCameraFlow()" aria-label="다시 촬영">다시 찍기</button>
+        </div>
+        <div id="ctaConfirm" class="cta-row hidden">
+            <button class="btn btn-accent" id="confirmYesBtn" onclick="confirmIdentification(true)" aria-label="맞음, 출력하기">맞음</button>
+            <button class="btn btn-negative" id="confirmNoBtn" onclick="confirmIdentification(false)" aria-label="틀림, 다시 찍기">다시</button>
+        </div>
+        <div id="ctaSingle" class="cta-row hidden">
+            <button class="btn btn-primary" onclick="searchDrug()" aria-label="제품 검색">검색</button>
+        </div>
+        <div id="ctaGenerate" class="cta-row hidden">
+            <button class="btn btn-accent" id="generateBtn" onclick="generateOutput()" disabled aria-label="점자 라벨과 NFC 출력">점자 라벨 출력 + NFC</button>
+        </div>
+        <div id="ctaPacket" class="cta-row hidden">
+            <button class="btn btn-accent" id="packetGenerateBtn" onclick="generatePacket()" aria-label="묶음 라벨과 NFC 출력">묶음 라벨 출력 + NFC</button>
+        </div>
+    </div>
+    <nav class="mode-tabs" role="tablist" aria-label="기능 선택">
+        <button type="button" class="mode-tab active" id="tabCamera" role="tab" aria-selected="true" onclick="switchMode('camera')">촬영</button>
+        <button type="button" class="mode-tab" id="tabSingle" role="tab" aria-selected="false" onclick="switchMode('single')">이름 검색</button>
+        <button type="button" class="mode-tab" id="tabPacket" role="tab" aria-selected="false" onclick="switchMode('packet')">묶음 제품</button>
+    </nav>
+</footer>
 </div>
 
 <script>
@@ -708,6 +504,7 @@ function resetCameraFlow() {
     stopListening();
     pendingIdentify = null;
     document.getElementById('confirmPanel').classList.remove('visible');
+    updateBottomCta();
     hideStatus('cameraStatus');
     setVoiceLive('');
     document.getElementById('captureBtn').disabled = false;
@@ -763,6 +560,7 @@ async function captureAndIdentify() {
         const summary = (pendingIdentify.voiceScript || []).join(' ');
         document.getElementById('confirmSummary').textContent = summary;
         document.getElementById('confirmPanel').classList.add('visible');
+        updateBottomCta();
 
         await speakScript(pendingIdentify.voiceScript || []);
         startListening();
@@ -937,6 +735,7 @@ function renderResult(drug) {
     fetchBraille(currentSearchQuery || drug.itemName);
 
     document.getElementById('generateBtn').disabled = false;
+    updateBottomCta();
 }
 
 async function fetchBraille(name) {
@@ -1095,7 +894,21 @@ function useManualData() {
 
 // ── 모드 전환 ──────────────────────────────
 
+let currentMode = 'camera';
+
+function updateBottomCta() {
+    const confirmVisible = document.getElementById('confirmPanel').classList.contains('visible');
+    const resultVisible = document.getElementById('result-section').style.display !== 'none';
+
+    document.getElementById('ctaCamera').classList.toggle('hidden', currentMode !== 'camera' || confirmVisible);
+    document.getElementById('ctaConfirm').classList.toggle('hidden', currentMode !== 'camera' || !confirmVisible);
+    document.getElementById('ctaSingle').classList.toggle('hidden', currentMode !== 'single' || resultVisible);
+    document.getElementById('ctaGenerate').classList.toggle('hidden', currentMode !== 'single' || !resultVisible);
+    document.getElementById('ctaPacket').classList.toggle('hidden', currentMode !== 'packet');
+}
+
 function switchMode(mode) {
+    currentMode = mode;
     const isCamera = mode === 'camera';
     const isSingle = mode === 'single';
     document.getElementById('camera-mode').style.display = isCamera ? '' : 'none';
@@ -1104,11 +917,15 @@ function switchMode(mode) {
     document.getElementById('tabCamera').classList.toggle('active', isCamera);
     document.getElementById('tabSingle').classList.toggle('active', isSingle);
     document.getElementById('tabPacket').classList.toggle('active', !isCamera && !isSingle);
+    document.getElementById('tabCamera').setAttribute('aria-selected', isCamera);
+    document.getElementById('tabSingle').setAttribute('aria-selected', isSingle);
+    document.getElementById('tabPacket').setAttribute('aria-selected', !isCamera && !isSingle);
 
     if (isCamera) {
         initCamera();
     } else {
         stopCamera();
+        document.getElementById('confirmPanel').classList.remove('visible');
     }
 
     if (!isSingle) {
@@ -1116,6 +933,8 @@ function switchMode(mode) {
     } else if (currentDrug) {
         document.getElementById('result-section').style.display = 'block';
     }
+
+    updateBottomCta();
 }
 
 window.addEventListener('load', () => {
@@ -1289,7 +1108,7 @@ async function generatePacket() {
                 <span class="hw-badge ${data.nfc_ok ? 'hw-ok' : 'hw-err'}">${nfcLabel}</span>
             </div>
             <div class="nfc-url"><a href="${data.nfc_data}" target="_blank">${data.nfc_data}</a></div>
-            ${preview ? `<ul style="margin-top:8px;font-size:13px;color:#2d3748;padding-left:18px">${preview}</ul>` : ''}
+            ${preview ? `<ul style="margin-top:8px;font-size:13px;color:var(--text-secondary);padding-left:18px">${preview}</ul>` : ''}
         `;
         showStatusHtml('packetStatus', 'success', statusHtml);
     } catch (e) {
