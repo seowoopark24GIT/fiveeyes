@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -22,6 +23,7 @@ async def login_required_handler(_request: Request, _exc: LoginRequiredException
 app.include_router(auth.router)
 app.include_router(pharmacist.router)
 app.include_router(user.router)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
