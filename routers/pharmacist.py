@@ -21,7 +21,7 @@ from services.ai_service import (
     build_identification_voice,
 )
 from services.printer import print_braille_label
-from services.nfc_writer import write_nfc_url
+from services.nfc_writer import write_nfc_url, write_nfc_text
 from routers.auth import require_login
 from config import BASE_URL
 
@@ -38,8 +38,8 @@ def get_db():
 
 
 @router.get("/pharmacist", response_class=HTMLResponse)
-def pharmacist_page(request: Request, user: User = Depends(require_login)):
-    response = templates.TemplateResponse("pharmacist.html", {"request": request, "user": user})
+def pharmacist_page(request: Request):
+    response = templates.TemplateResponse("pharmacist.html", {"request": request})
     response.headers["Cache-Control"] = "no-store"
     return response
 
@@ -127,7 +127,6 @@ async def _lookup_cosmetic(name_guess: str) -> tuple[dict, bool]:
 @router.post("/pharmacist/identify")
 async def identify_product(
     body: IdentifyRequest,
-    user: User = Depends(require_login),
 ):
     """웹캠 촬영 → GPT 분류 → 공식 API 검증 → 음성 확인용 스크립트 반환"""
     try:
@@ -214,11 +213,22 @@ async def identify_product(
     }
 
 
+class VoiceNoteRequest(BaseModel):
+    item_name: str
+    note: str
+
+
+@router.post("/pharmacist/save-voice-note")
+async def save_voice_note(data: VoiceNoteRequest):
+    text = f"{data.item_name}: {data.note}"
+    success = write_nfc_text(text)
+    return {"success": success, "text": text}
+
+
 @router.post("/pharmacist/generate")
 async def generate_output(
     data: PharmacistGenerateRequest,
     db: Session = Depends(get_db),
-    user: User = Depends(require_login),
 ):
     """점자 라벨 출력 + NFC 태그 쓰기 + DB 저장 + AI 음성 스크립트 생성"""
 
@@ -280,7 +290,6 @@ async def generate_output(
 async def generate_packet_output(
     data: PacketMedicineRequest,
     db: Session = Depends(get_db),
-    user: User = Depends(require_login),
 ):
     """봉지약: 약사 직접 입력 → 음성 스크립트 생성 → NFC + 점자 출력"""
     item_seq = f"PKT-{uuid4().hex[:8]}"

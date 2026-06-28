@@ -288,6 +288,88 @@ textarea.field-input { resize: vertical; min-height: 70px; }
 .btn-add-drug:hover { border-color: var(--primary); color: var(--primary); background: rgba(31, 87, 231, 0.12); }
 
 /* ── 카메라 ── */
+#splashOverlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    cursor: pointer;
+    gap: 24px;
+    padding: 40px;
+    text-align: center;
+}
+#splashOverlay .splash-logo {
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+}
+#splashOverlay .splash-hint {
+    font-size: 20px;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+#splashOverlay .splash-tap {
+    margin-top: 16px;
+    font-size: 16px;
+    color: var(--accent-text);
+    background: var(--accent);
+    padding: 16px 40px;
+    border-radius: 50px;
+    font-weight: 600;
+}
+
+.voice-note-panel {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+    padding: 16px 0;
+}
+.ptt-area {
+    width: 100%;
+    min-height: 200px;
+    background: var(--surface);
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+    touch-action: none;
+    transition: background 0.15s, border-color 0.15s;
+    text-align: center;
+    padding: 24px;
+    line-height: 1.6;
+}
+.ptt-area.recording {
+    background: rgba(248, 200, 50, 0.12);
+    border-color: var(--accent);
+    color: var(--text);
+    animation: ptt-pulse 1s ease-in-out infinite;
+}
+@keyframes ptt-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(248, 200, 50, 0.3); }
+    50% { box-shadow: 0 0 0 12px rgba(248, 200, 50, 0); }
+}
+.voice-note-result {
+    font-size: 16px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    min-height: 52px;
+    line-height: 1.6;
+    display: none;
+}
+
 .camera-wrap {
     display: flex;
     flex-direction: column;
@@ -333,8 +415,13 @@ textarea.field-input { resize: vertical; min-height: 70px; }
 <div class="app-shell">
 <header class="app-header">
     <a href="/" class="logo">소리잇다</a>
-    <a href="/logout" class="logout-btn">로그아웃</a>
 </header>
+
+<div id="splashOverlay" role="dialog" aria-modal="true" aria-label="시작 화면">
+    <div class="splash-logo">소리잇다</div>
+    <p class="splash-hint">물건을 카메라로 촬영하면<br>음성으로 정보를 알려드립니다</p>
+    <div class="splash-tap">화면을 누르면 시작합니다</div>
+</div>
 
 <main class="app-main">
     <div class="page-section">
@@ -353,6 +440,16 @@ textarea.field-input { resize: vertical; min-height: 70px; }
                     <p id="confirmSummary">—</p>
                 </div>
             </div>
+        </div>
+
+        <div id="voiceNotePanel" class="voice-note-panel">
+            <div
+                id="pttArea"
+                class="ptt-area"
+                aria-label="길게 눌러 음성 입력"
+                role="button"
+            >길게 누르는 동안 말씀해 주세요</div>
+            <div id="voiceNoteResult" class="voice-note-result" aria-live="polite"></div>
         </div>
 
         <!-- 이름 검색 -->
@@ -476,6 +573,10 @@ let pendingIdentify = null;
 let speechRecognition = null;
 let isListening = false;
 let isSpeaking = false;
+let isVoiceNoteMode = false;
+let voiceNoteItemName = '';
+let pttRecognition = null;
+let pttFinalText = '';
 
 // ── 카메라 + 음성 확인 ──────────────────────────────
 
@@ -510,6 +611,108 @@ function resetCameraFlow() {
     document.getElementById('captureBtn').disabled = false;
     initCamera();
     speakText('다시 촬영해 주세요.');
+}
+
+async function enterVoiceNoteMode(itemName) {
+    isVoiceNoteMode = true;
+    voiceNoteItemName = itemName;
+    pendingIdentify = null;
+    document.getElementById('confirmPanel').classList.remove('visible');
+    document.getElementById('cameraWrap') && (document.getElementById('cameraWrap').style.display = 'none');
+    document.querySelector('.camera-wrap').style.display = 'none';
+    document.getElementById('voiceNotePanel').style.display = 'flex';
+    document.getElementById('voiceNoteResult').style.display = 'none';
+    document.getElementById('voiceNoteResult').textContent = '';
+    stopCamera();
+    updateBottomCta();
+    await speakText('정보를 찾지 못했습니다. 직접 말씀해 주세요.');
+    await speakText('화면을 길게 누르면 음성으로 입력됩니다.');
+}
+
+function resetVoiceNoteMode() {
+    isVoiceNoteMode = false;
+    voiceNoteItemName = '';
+    pttFinalText = '';
+    document.getElementById('voiceNotePanel').style.display = 'none';
+    document.querySelector('.camera-wrap').style.display = '';
+    updateBottomCta();
+    initCamera();
+}
+
+function startPTT() {
+    if (pttRecognition) return;
+    window.speechSynthesis.cancel();
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+        speakText('음성 인식을 지원하지 않는 브라우저입니다.');
+        return;
+    }
+    pttFinalText = '';
+    pttRecognition = new SR();
+    pttRecognition.lang = 'ko-KR';
+    pttRecognition.interimResults = true;
+    pttRecognition.continuous = true;
+
+    pttRecognition.onresult = (e) => {
+        pttFinalText = Array.from(e.results).map(r => r[0].transcript).join('');
+        const resultEl = document.getElementById('voiceNoteResult');
+        resultEl.style.display = 'block';
+        resultEl.textContent = pttFinalText;
+    };
+
+    pttRecognition.onend = async () => {
+        pttRecognition = null;
+        document.getElementById('pttArea').classList.remove('recording');
+        if (pttFinalText.trim()) {
+            await saveVoiceNote(pttFinalText.trim());
+        } else {
+            await speakText('입력된 내용이 없습니다. 다시 길게 눌러 말씀해 주세요.');
+        }
+    };
+
+    pttRecognition.start();
+    document.getElementById('pttArea').classList.add('recording');
+}
+
+function stopPTT() {
+    if (pttRecognition) {
+        pttRecognition.stop();
+    }
+}
+
+async function saveVoiceNote(text) {
+    document.getElementById('voiceNotePanel').style.display = 'none';
+    document.querySelector('.camera-wrap').style.display = '';
+    isVoiceNoteMode = false;
+
+    currentDrug = { itemName: voiceNoteItemName, itemSeq: '', itemImage: null };
+    currentSearchQuery = voiceNoteItemName;
+    renderResult(currentDrug);
+
+    showStatus('generateStatus', 'loading', 'NFC 태그 저장 중...');
+
+    try {
+        const res = await fetch('/pharmacist/save-voice-note', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ item_name: voiceNoteItemName, note: text }),
+        });
+        const data = await res.json();
+        const nfcLabel = data.success ? 'NFC 태그 완료' : 'NFC 태그 미연결';
+        const statusHtml = `
+            저장 완료
+            <div class="hw-status">
+                <span class="hw-badge ${data.success ? 'hw-ok' : 'hw-err'}">${nfcLabel}</span>
+            </div>
+            <div class="nfc-url">${data.text}</div>
+        `;
+        showStatusHtml('generateStatus', 'success', statusHtml);
+        await speakText(data.success ? 'NFC 태그에 저장되었습니다.' : 'NFC 태그가 연결되지 않았습니다.');
+    } catch {
+        showStatus('generateStatus', 'error', '저장 오류가 발생했습니다.');
+        await speakText('오류가 발생했습니다. 다시 시도해 주세요.');
+    }
+    updateBottomCta();
 }
 
 async function captureAndIdentify() {
@@ -571,12 +774,17 @@ async function captureAndIdentify() {
     }
 }
 
-function confirmIdentification(isYes) {
+async function confirmIdentification(isYes) {
     stopListening();
     if (!pendingIdentify) return;
 
     if (!isYes) {
         resetCameraFlow();
+        return;
+    }
+
+    if (!pendingIdentify.verified) {
+        enterVoiceNoteMode(pendingIdentify.shortLabel || pendingIdentify.product?.itemName || '');
         return;
     }
 
@@ -900,8 +1108,8 @@ function updateBottomCta() {
     const confirmVisible = document.getElementById('confirmPanel').classList.contains('visible');
     const resultVisible = document.getElementById('result-section').style.display !== 'none';
 
-    document.getElementById('ctaCamera').classList.toggle('hidden', currentMode !== 'camera' || confirmVisible);
-    document.getElementById('ctaConfirm').classList.toggle('hidden', currentMode !== 'camera' || !confirmVisible);
+    document.getElementById('ctaCamera').classList.toggle('hidden', currentMode !== 'camera' || confirmVisible || isVoiceNoteMode);
+    document.getElementById('ctaConfirm').classList.toggle('hidden', currentMode !== 'camera' || !confirmVisible || isVoiceNoteMode);
     document.getElementById('ctaSingle').classList.toggle('hidden', currentMode !== 'single' || resultVisible);
     document.getElementById('ctaGenerate').classList.toggle('hidden', currentMode !== 'single' || !resultVisible);
     document.getElementById('ctaPacket').classList.toggle('hidden', currentMode !== 'packet');
@@ -938,7 +1146,20 @@ function switchMode(mode) {
 }
 
 window.addEventListener('load', () => {
-    switchMode('camera');
+    const splash = document.getElementById('splashOverlay');
+    splash.addEventListener('click', async () => {
+        splash.style.display = 'none';
+        switchMode('camera');
+        await speakText('소리잇다입니다. 카메라가 켜졌습니다.');
+        await speakText('물건을 카메라에 비춰주세요. 준비되면 화면을 눌러 촬영하세요.');
+    }, { once: true });
+
+    const pttArea = document.getElementById('pttArea');
+    pttArea.addEventListener('mousedown', startPTT);
+    pttArea.addEventListener('touchstart', (e) => { e.preventDefault(); startPTT(); }, { passive: false });
+    pttArea.addEventListener('mouseup', stopPTT);
+    pttArea.addEventListener('touchend', (e) => { e.preventDefault(); stopPTT(); }, { passive: false });
+    pttArea.addEventListener('mouseleave', () => { if (pttRecognition) stopPTT(); });
 });
 
 // ── 봉지약 약 목록 ──────────────────────────

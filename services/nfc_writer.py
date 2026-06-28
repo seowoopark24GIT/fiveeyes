@@ -10,6 +10,30 @@ except ImportError:
     logger.info("nfcpy 미설치: NFC 쓰기 기능 비활성화 (NFC 라이터 연결 시 pip install nfcpy)")
 
 
+def write_nfc_text(text: str) -> bool:
+    """USB NFC 라이터로 NDEF Text 레코드 기록."""
+    if not _NFC_AVAILABLE:
+        logger.error("nfcpy 미설치로 NFC 쓰기 불가")
+        return False
+
+    try:
+        with nfc.ContactlessFrontend("usb") as clf:
+            tag = clf.connect(rdwr={"on-connect": lambda tag: False})
+            if tag is None:
+                logger.error("NFC 태그를 찾을 수 없습니다")
+                return False
+
+            record = nfc.ndef.TextRecord(text, language="ko")
+            message = nfc.ndef.Message(record)
+            tag.ndef.records = message.records
+            tag.ndef.length = len(message)
+        logger.info("NFC 텍스트 쓰기 완료: %s", text[:50])
+        return True
+    except Exception as e:
+        logger.error("NFC 텍스트 쓰기 실패: %s", e)
+        return False
+
+
 def write_nfc_url(url: str) -> bool:
     """USB NFC 라이터로 NDEF URL 레코드 기록.
 
