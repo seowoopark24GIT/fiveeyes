@@ -20,8 +20,7 @@ from services.ai_service import (
     identify_from_image,
     build_identification_voice,
 )
-from services.printer import print_braille_label
-from services.nfc_writer import write_nfc_url
+from services.hardware import dispatch_label_job
 from routers.auth import require_login
 from config import BASE_URL
 
@@ -262,15 +261,20 @@ async def generate_output(
     braille_name = convert_to_braille(data.braille_text or data.item_name)
     nfc_url = f"{BASE_URL}/medicine/{data.item_seq}"
 
-    printer_ok = print_braille_label(braille_name, data.item_name)
-    nfc_ok = write_nfc_url(nfc_url)
+    hw = dispatch_label_job(
+        braille=braille_name,
+        nfc_url=nfc_url,
+        label=data.item_name,
+    )
 
     return {
         "success": True,
         "nfc_data": nfc_url,
         "braille_name": braille_name + data.item_name,
-        "printer_ok": printer_ok,
-        "nfc_ok": nfc_ok,
+        "printer_ok": hw.braille_ok,
+        "nfc_ok": hw.nfc_ok,
+        "hardware_mode": hw.mode,
+        "hardware_detail": hw.detail,
         "medicine_id": medicine.id,
         "voice_preview": voice_script[:2],  # 약사 화면에 미리보기용
     }
@@ -310,16 +314,21 @@ async def generate_packet_output(
     braille_name = convert_to_braille(data.label)
     nfc_url = f"{BASE_URL}/medicine/{item_seq}"
 
-    printer_ok = print_braille_label(braille_name, data.label)
-    nfc_ok = write_nfc_url(nfc_url)
+    hw = dispatch_label_job(
+        braille=braille_name,
+        nfc_url=nfc_url,
+        label=data.label,
+    )
 
     return {
         "success": True,
         "nfc_data": nfc_url,
         "item_seq": item_seq,
         "braille_name": braille_name + data.label,
-        "printer_ok": printer_ok,
-        "nfc_ok": nfc_ok,
+        "printer_ok": hw.braille_ok,
+        "nfc_ok": hw.nfc_ok,
+        "hardware_mode": hw.mode,
+        "hardware_detail": hw.detail,
         "medicine_id": medicine.id,
         "voice_preview": voice_script[:3],
     }
