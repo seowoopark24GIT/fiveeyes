@@ -547,6 +547,9 @@ textarea.field-input { resize: vertical; min-height: 70px; }
             <button class="btn btn-accent" id="confirmYesBtn" onclick="confirmIdentification(true)" aria-label="맞음, 출력하기">맞음</button>
             <button class="btn btn-negative" id="confirmNoBtn" onclick="confirmIdentification(false)" aria-label="틀림, 다시 찍기">다시</button>
         </div>
+        <div id="ctaDone" class="cta-row hidden">
+            <button class="btn btn-negative" id="doneRetakeBtn" onclick="resetCameraFlow()" aria-label="다시 촬영하기">다시</button>
+        </div>
         <div id="ctaSingle" class="cta-row hidden">
             <button class="btn btn-primary" onclick="searchDrug()" aria-label="제품 검색">검색</button>
         </div>
@@ -574,6 +577,7 @@ let speechRecognition = null;
 let isListening = false;
 let isSpeaking = false;
 let isVoiceNoteMode = false;
+let outputDone = false;
 let voiceNoteItemName = '';
 let pttRecognition = null;
 let pttFinalText = '';
@@ -604,7 +608,9 @@ function stopCamera() {
 function resetCameraFlow() {
     stopListening();
     pendingIdentify = null;
+    outputDone = false;
     document.getElementById('confirmPanel').classList.remove('visible');
+    hideStatus('generateStatus');
     updateBottomCta();
     hideStatus('cameraStatus');
     setVoiceLive('');
@@ -660,13 +666,28 @@ function startPTT() {
         resultEl.textContent = pttFinalText;
     };
 
+    let pttErrorMsg = '';
+    pttRecognition.onerror = (e) => {
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+            pttErrorMsg = '마이크 권한이 꺼져 있습니다. 브라우저 설정에서 마이크를 허용해 주세요.';
+        } else if (e.error === 'no-speech') {
+            pttErrorMsg = '음성이 감지되지 않았습니다. 더 길게, 더 크게 말씀해 주세요.';
+        } else {
+            pttErrorMsg = `음성 인식 오류(${e.error})가 발생했습니다.`;
+        }
+    };
+
     pttRecognition.onend = async () => {
         pttRecognition = null;
         document.getElementById('pttArea').classList.remove('recording');
         if (pttFinalText.trim()) {
             await saveVoiceNote(pttFinalText.trim());
         } else {
-            await speakText('입력된 내용이 없습니다. 다시 길게 눌러 말씀해 주세요.');
+            const msg = pttErrorMsg || '입력된 내용이 없습니다. 다시 길게 눌러 말씀해 주세요.';
+            const resultEl = document.getElementById('voiceNoteResult');
+            resultEl.style.display = 'block';
+            resultEl.textContent = msg;
+            await speakText(msg);
         }
     };
 
@@ -783,7 +804,8 @@ async function confirmIdentification(isYes) {
         return;
     }
 
-    if (!pendingIdentify.verified) {
+    // 공식 데이터도 없고 화장품 AI 추정 정보도 없을 때만 수동 음성 입력으로 이동
+    if (!pendingIdentify.verified && !pendingIdentify.aiGuessAvailable) {
         enterVoiceNoteMode(pendingIdentify.shortLabel || pendingIdentify.product?.itemName || '');
         return;
     }
@@ -795,9 +817,10 @@ async function confirmIdentification(isYes) {
     speakText('확인되었습니다. 라벨을 출력합니다.');
     setVoiceLive('출력 중...');
     pendingIdentify = null;
+    outputDone = true;
     document.getElementById('confirmPanel').classList.remove('visible');
+    updateBottomCta();
     generateOutput();
-    document.getElementById('captureBtn').disabled = false;
 }
 
 function setVoiceLive(msg) {
@@ -1108,8 +1131,9 @@ function updateBottomCta() {
     const confirmVisible = document.getElementById('confirmPanel').classList.contains('visible');
     const resultVisible = document.getElementById('result-section').style.display !== 'none';
 
-    document.getElementById('ctaCamera').classList.toggle('hidden', currentMode !== 'camera' || confirmVisible || isVoiceNoteMode);
-    document.getElementById('ctaConfirm').classList.toggle('hidden', currentMode !== 'camera' || !confirmVisible || isVoiceNoteMode);
+    document.getElementById('ctaCamera').classList.toggle('hidden', currentMode !== 'camera' || confirmVisible || isVoiceNoteMode || outputDone);
+    document.getElementById('ctaConfirm').classList.toggle('hidden', currentMode !== 'camera' || !confirmVisible || isVoiceNoteMode || outputDone);
+    document.getElementById('ctaDone').classList.toggle('hidden', currentMode !== 'camera' || !outputDone);
     document.getElementById('ctaSingle').classList.toggle('hidden', currentMode !== 'single' || resultVisible);
     document.getElementById('ctaGenerate').classList.toggle('hidden', currentMode !== 'single' || !resultVisible);
     document.getElementById('ctaPacket').classList.toggle('hidden', currentMode !== 'packet');
@@ -1133,7 +1157,9 @@ function switchMode(mode) {
         initCamera();
     } else {
         stopCamera();
+        outputDone = false;
         document.getElementById('confirmPanel').classList.remove('visible');
+        hideStatus('generateStatus');
     }
 
     if (!isSingle) {

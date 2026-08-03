@@ -1,7 +1,7 @@
 import httpx
 from config import MFDS_API_KEY
 
-_BASE = "http://apis.data.go.kr/1471000"
+_BASE = "https://apis.data.go.kr/1471000"
 
 # 공공데이터포털: 기능성화장품 보고품목정보
 # https://www.data.go.kr/data/15095680/openapi.do

@@ -9,6 +9,9 @@ _IDENTIFY_SYSTEM = (
     "당신은 시각장애인을 위한 제품 식별 도우미입니다. "
     "사진 속 포장·라벨·알약·튜브 등을 보고 의약품(medicine)인지 화장품(cosmetic)인지 분류합니다. "
     "제품명을 한글로 최대한 정확히 추정하고, 촉각·형태 중심으로 짧게 설명합니다. "
+    "화장품인 경우에만 브랜드/제품 용도에 대해 알고 있는 일반 지식을 추가로 짧게 답하세요 "
+    "(공식 확인이 아닌 참고용임을 스스로 인지하고 답할 것). "
+    "의약품인 경우 이 필드는 비워두세요 — 의약품 효능·용법은 반드시 공식 데이터로만 안내합니다. "
     "의료 진단·처방은 하지 마세요. JSON만 출력하세요."
 )
 
@@ -43,6 +46,7 @@ async def identify_from_image(image_base64: str) -> dict:
                             '"name_guess": "추정 제품명", '
                             '"short_label": "점자·음성용 10자 이내 짧은 이름", '
                             '"visual_description": "촉각·형태 중심 25자 이내 설명", '
+                            '"ai_guess_info": "화장품일 때만: 브랜드/용도/색상에 대해 아는 내용 30자 이내, 의약품이면 빈 문자열", '
                             '"confidence": "high"|"medium"|"low" }'
                         ),
                     },
@@ -63,6 +67,7 @@ async def identify_from_image(image_base64: str) -> dict:
         "name_guess": (result.get("name_guess") or "").strip(),
         "short_label": (result.get("short_label") or result.get("name_guess") or "").strip(),
         "visual_description": (result.get("visual_description") or "").strip(),
+        "ai_guess_info": (result.get("ai_guess_info") or "").strip() if product_type == "cosmetic" else "",
         "confidence": result.get("confidence", "medium"),
     }
 
@@ -72,6 +77,7 @@ def build_identification_voice(
     item_name: str,
     summary_lines: list[str],
     verified: bool,
+    ai_guess_info: str | None = None,
 ) -> list[str]:
     """촬영 후 확인용 음성 스크립트 (TTS 재생 순서)"""
     kind = "의약품" if product_type == "medicine" else "화장품"
@@ -80,6 +86,10 @@ def build_identification_voice(
 
     if not verified:
         sentences.append("공식 데이터베이스에서 일치하는 정보를 찾지 못했습니다.")
+        # 화장품에 한해서만 AI 추정 정보를 참고용으로 안내 (의약품은 공식 데이터 없이는 정보 제공 금지)
+        if product_type == "cosmetic" and ai_guess_info:
+            sentences.append("아래는 공식 확인이 안 된, AI가 추정한 참고 정보입니다.")
+            sentences.append(ai_guess_info)
 
     sentences.append(
         "맞으면 '맞아'라고, 틀리면 '다시'라고 말씀해 주세요. "

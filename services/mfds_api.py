@@ -1,12 +1,45 @@
 import re
+import difflib
 import httpx
 from config import MFDS_API_KEY
 
-_BASE = "http://apis.data.go.kr/1471000"
+_BASE = "https://apis.data.go.kr/1471000"
 
 # 공공데이터포털에서 발급받은 서비스 기준:
 # - MdcinGrnIdntfcInfoService03 : 낱알 식별 정보 (이미지, 모양, 색상)
 # - DrbEasyDrugInfoService       : 쉬운 의약품 정보 (효능, 복용법, 주의사항)
+
+_CHILD_KEYWORDS = ("어린이", "소아")
+
+
+def _extract_digits(text: str) -> str:
+    return "".join(re.findall(r"\d+", text or ""))
+
+
+def _score_match(query: str, candidate_name: str) -> float:
+    """query(원본 추정명)와 candidate_name(API 결과)의 유사도 점수.
+    같은 브랜드라도 용량이 다르거나 소아용/성인용이 뒤바뀐 항목을 걸러내기 위함.
+    (예: "타이레놀500mg" 조회 시 "어린이타이레놀산160밀리그램"이 뽑히는 것 방지)
+    """
+    score = difflib.SequenceMatcher(None, query, candidate_name).ratio()
+
+    q_digits = _extract_digits(query)
+    c_digits = _extract_digits(candidate_name)
+    if q_digits and c_digits:
+        score += 0.5 if q_digits == c_digits else -0.3
+
+    q_child = any(kw in query for kw in _CHILD_KEYWORDS)
+    c_child = any(kw in candidate_name for kw in _CHILD_KEYWORDS)
+    if q_child != c_child:
+        score -= 0.4
+
+    return score
+
+
+def _pick_best_match(query: str, items: list[dict]) -> dict:
+    if len(items) == 1:
+        return items[0]
+    return max(items, key=lambda item: _score_match(query, item.get("itemName") or ""))
 
 
 async def search_drug_info(item_name: str) -> list[dict]:
@@ -40,7 +73,7 @@ async def search_drug_appearance(item_name: str) -> dict | None:
         "serviceKey": MFDS_API_KEY,
         "item_name": item_name,
         "type": "json",
-        "numOfRows": 1,
+        "numOfRows": 5,
         "pageNo": 1,
     }
     async with httpx.AsyncClient(timeout=10) as client:
@@ -53,7 +86,8 @@ async def search_drug_appearance(item_name: str) -> dict | None:
     if not items:
         return None
 
-    item = items[0] if isinstance(items, list) else items
+    items = items if isinstance(items, list) else [items]
+    item = _pick_best_match(item_name, [{**i, "itemName": i.get("ITEM_NAME")} for i in items])
     return {
         "itemSeq":    item.get("ITEM_SEQ"),
         "itemImage":  item.get("ITEM_IMAGE"),
@@ -98,7 +132,8 @@ async def search_drug_info_smart(item_name: str) -> list[dict]:
             continue
         result = await search_drug_info(name)
         if result:
-            return result
+            best = _pick_best_match(item_name, result)
+            return [best] + [d for d in result if d is not best]
 
     return []
 

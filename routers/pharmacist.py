@@ -94,6 +94,7 @@ def _first_sentence(text: str | None, max_len: int = 25) -> str:
 
 
 async def _lookup_medicine(name_guess: str) -> tuple[dict, bool]:
+    name_guess = name_guess.replace(" ", "")
     easy_list = await search_drug_info_smart(name_guess)
     appearance = await search_drug_appearance(name_guess)
     if not easy_list:
@@ -166,20 +167,29 @@ async def identify_product(
     verified = False
     product: dict = {}
 
-    if product_type == "medicine":
-        product, verified = await _lookup_medicine(name_guess)
-    else:
-        product, verified = await _lookup_cosmetic(name_guess)
+    try:
+        if product_type == "medicine":
+            product, verified = await _lookup_medicine(name_guess)
+        else:
+            product, verified = await _lookup_cosmetic(name_guess)
+    except Exception:
+        # 공식 데이터 API 자체가 실패(타임아웃/권한오류 등)해도 크래시 대신
+        # "공식 데이터 없음" 경로로 자연스럽게 넘어가도록 처리
+        product, verified = {}, False
 
     if not verified:
         item_seq = f"{'COS' if product_type == 'cosmetic' else 'CAM'}-{uuid4().hex[:8]}"
+        ai_guess_info = gpt.get("ai_guess_info") if product_type == "cosmetic" else ""
+        atpn_text = "공식 정보를 찾지 못했습니다. 약사에게 확인하세요."
+        if product_type == "cosmetic" and ai_guess_info:
+            atpn_text = f"[AI 추정 · 공식 미검증] {ai_guess_info}"
         product = {
             "productType": product_type,
             "itemSeq": item_seq,
             "itemName": name_guess,
             "efcyQesitm": gpt["visual_description"] or None,
             "useMethodQesitm": None,
-            "atpnWarnQesitm": "공식 정보를 찾지 못했습니다. 약사에게 확인하세요.",
+            "atpnWarnQesitm": atpn_text,
             "seQesitm": None,
             "itemImage": None,
             "drugShape": None,
@@ -200,11 +210,14 @@ async def identify_product(
         item_name=product.get("itemName") or name_guess,
         summary_lines=summary,
         verified=verified,
+        ai_guess_info=gpt.get("ai_guess_info") if product_type == "cosmetic" else None,
     )
 
     return {
         "productType": product_type,
         "verified": verified,
+        # 공식 데이터는 없지만 화장품 AI 추정 정보가 있어서 그대로 출력 가능한 경우
+        "aiGuessAvailable": bool(product_type == "cosmetic" and not verified and gpt.get("ai_guess_info")),
         "shortLabel": gpt["short_label"] or product.get("itemName") or name_guess,
         "gptConfidence": gpt["confidence"],
         "visualDescription": gpt["visual_description"],
